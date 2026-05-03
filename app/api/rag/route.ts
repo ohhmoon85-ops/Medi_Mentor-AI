@@ -3,14 +3,18 @@ import { embedText } from '@/lib/rag/embed'
 import { retrieveEvidence } from '@/lib/rag/retrieve'
 import { generateAnswer } from '@/lib/rag/generate'
 import { applyMedicalLawFilter } from '@/lib/safety/medical-law-filter'
+import { KOREAN_SPECIALTIES } from '@/lib/constants/specialties'
+import { isValidSpecialtyCode } from '@/lib/utils/pro-context'
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, persona, type } = await req.json()
+    const { query, persona, type, specialty } = await req.json()
 
     if (!query?.trim()) {
       return NextResponse.json({ error: '쿼리를 입력해 주세요.' }, { status: 400 })
     }
+
+    const validSpecialty = isValidSpecialtyCode(specialty) ? specialty : null
 
     const embedding = await embedText(query)
     const { chunks, confidence, has_korean_evidence } = await retrieveEvidence(embedding)
@@ -25,7 +29,19 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const result = await generateAnswer({ query, chunks, persona: persona ?? 'patient' })
+    // specialty가 있으면 의사용 기본 프롬프트에 진료과 컨텍스트 추가
+    const specialtyContext = (persona === 'doctor' && validSpecialty)
+      ? `\n[질의자 진료과 컨텍스트] ${KOREAN_SPECIALTIES[validSpecialty].ko}(${validSpecialty}) 전문의가 자신의 진료 영역에서 묻는 질문이다. 해당 진료과의 표준 진료 관행과 한국 임상 가이드라인을 우선 참조하라.\n`
+      : ''
+
+    const systemContext = specialtyContext || undefined
+
+    const result = await generateAnswer({
+      query,
+      chunks,
+      persona: persona ?? 'patient',
+      systemContext,
+    })
 
     // 환자용 출력은 의료법 필터 적용
     const answer = persona === 'patient'

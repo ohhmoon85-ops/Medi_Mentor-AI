@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { embedText } from '@/lib/rag/embed'
 import { retrieveEvidence } from '@/lib/rag/retrieve'
+import { KOREAN_SPECIALTIES } from '@/lib/constants/specialties'
+import { isValidSpecialtyCode } from '@/lib/utils/pro-context'
+import { CATEGORY_PATTERNS, PREGNANCY_PATTERN } from '@/lib/safety/red-flag-data'
+import type { DDxRedFlagEntry } from '@/lib/types/medical'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -36,11 +40,19 @@ const DDX_SYSTEM_PROMPT = `당신은 한국의 선임 멘토 의사다. 후배 �
 
 export async function POST(req: NextRequest) {
   try {
-    const { chief_complaint, age, sex, hpi, exam, labs } = await req.json()
+    const { chief_complaint, age, sex, hpi, exam, labs, specialty } = await req.json()
 
     if (!chief_complaint?.trim()) {
       return NextResponse.json({ error: '주 증상을 입력해 주세요.' }, { status: 400 })
     }
+
+    const validSpecialty = isValidSpecialtyCode(specialty) ? specialty : null
+
+    const specialtyContext = validSpecialty
+      ? `\n[질의자 진료과 컨텍스트] ${KOREAN_SPECIALTIES[validSpecialty].ko}(${validSpecialty}) 전문의가 자신의 진료 영역에서 묻는 질문이다. 해당 진료과의 표준 진료 관행과 한국 임상 가이드라인을 우선 참조하라.\n`
+      : ''
+
+    const systemPrompt = DDX_SYSTEM_PROMPT + specialtyContext
 
     const caseText = [
       `주 증상: ${chief_complaint}`,
@@ -64,7 +76,7 @@ export async function POST(req: NextRequest) {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 3000,
-      system: DDX_SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     })
 
@@ -76,7 +88,50 @@ export async function POST(req: NextRequest) {
     }
 
     const result = JSON.parse(jsonMatch[0])
-    return NextResponse.json(result)
+
+    // ─── Red Flag 감지: CATEGORY_PATTERNS 전체 순회 (복수 매칭 허용) ───
+    const symptomText = [chief_complaint, hpi].filter(Boolean).join(' ')
+    const isPregnant = PREGNANCY_PATTERN.test(symptomText)
+
+    const SEVERITY_ORDER: Record<DDxRedFlagEntry['severity'], number> = {
+      critical: 3, urgent: 2, high: 1,
+    }
+
+    const rawRedFlags: DDxRedFlagEntry[] = []
+    for (const { category, pattern, urgency } of CATEGORY_PATTERNS) {
+      const match = symptomText.match(pattern)
+      if (!match) continue
+
+      // 임산부 복통: urgency를 immediate(critical)로 상향
+      const effectiveUrgency = (isPregnant && category === '복통') ? 'immediate' : urgency
+
+      rawRedFlags.push({
+        category: category as DDxRedFlagEntry['category'],
+        severity: effectiveUrgency === 'immediate' ? 'critical' : 'urgent',
+        action: effectiveUrgency === 'immediate' ? 'CALL_119' : 'ER_VISIT',
+        matched_pattern: pattern.source,
+        matched_text: match[0],
+        confidence: 1.0,
+      })
+    }
+
+    // 중복 제거: 같은 카테고리가 복수 발생 시 highest severity 유지
+    const seenCategories = new Set<string>()
+    const dedupedFlags: DDxRedFlagEntry[] = []
+    for (const entry of rawRedFlags.sort((a, b) => SEVERITY_ORDER[b.severity] - SEVERITY_ORDER[a.severity])) {
+      if (!seenCategories.has(entry.category)) {
+        seenCategories.add(entry.category)
+        dedupedFlags.push(entry)
+      }
+    }
+
+    // 최종 정렬: severity 내림차순, 동률 시 category 알파벳 순
+    const redFlags = dedupedFlags.sort((a, b) => {
+      const diff = SEVERITY_ORDER[b.severity] - SEVERITY_ORDER[a.severity]
+      return diff !== 0 ? diff : a.category.localeCompare(b.category)
+    })
+
+    return NextResponse.json({ ...result, red_flags: redFlags })
   } catch (err) {
     console.error('[ddx] error:', err)
     return NextResponse.json({ error: '서버 오류' }, { status: 500 })

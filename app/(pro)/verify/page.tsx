@@ -2,12 +2,19 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { KOREAN_SPECIALTIES } from '@/lib/constants/specialties'
+import type { SpecialtyCode } from '@/lib/constants/specialties'
+
+const SPECIALTY_OPTIONS = Object.values(KOREAN_SPECIALTIES).map((s) => ({
+  code: s.code as SpecialtyCode,
+  ko: s.ko,
+}))
 
 export default function VerifyPage() {
   const router = useRouter()
   const [step, setStep] = useState<'license' | 'consent' | 'verifying'>('license')
   const [licenseNumber, setLicenseNumber] = useState('')
-  const [specialty, setSpecialty] = useState('')
+  const [specialtyCode, setSpecialtyCode] = useState<SpecialtyCode | ''>('')
   const [consentChecked, setConsentChecked] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,20 +33,13 @@ export default function VerifyPage() {
     if (/^\d{6,}$/.test(licenseNumber.replace(/-/g, ''))) {
       sessionStorage.setItem('pro_verified', 'true')
       sessionStorage.setItem('pro_license', licenseNumber)
-      sessionStorage.setItem('pro_specialty', specialty)
+      sessionStorage.setItem('pro_specialty_code', specialtyCode)
       router.push('/pro/dashboard')
     } else {
       setError('면허번호 형식을 확인해 주세요. (예: 123456)')
       setStep('license')
     }
   }
-
-  const specialties = [
-    '가정의학과', '내과', '외과', '정형외과', '신경과', '신경외과',
-    '소아청소년과', '산부인과', '정신건강의학과', '응급의학과',
-    '피부과', '안과', '이비인후과', '비뇨의학과', '재활의학과',
-    '마취통증의학과', '영상의학과', '병리과', '진단검사의학과', '기타',
-  ]
 
   if (step === 'verifying') {
     return (
@@ -81,13 +81,15 @@ export default function VerifyPage() {
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1">진료과</label>
             <select
-              value={specialty}
-              onChange={(e) => setSpecialty(e.target.value)}
+              value={specialtyCode}
+              onChange={(e) => setSpecialtyCode(e.target.value as SpecialtyCode | '')}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <option value="">선택 (선택사항)</option>
-              {specialties.map((s) => (
-                <option key={s} value={s}>{s}</option>
+              {SPECIALTY_OPTIONS.map((opt) => (
+                <option key={opt.code} value={opt.code}>
+                  {opt.ko}
+                </option>
               ))}
             </select>
           </div>

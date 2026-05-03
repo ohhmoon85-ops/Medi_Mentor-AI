@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { getRandomSymptomExample } from '@/lib/constants/symptom-examples'
 
 interface SelfCareGuide {
   symptom: string
@@ -14,6 +15,7 @@ export default function SelfCarePage() {
   const [symptom, setSymptom] = useState('')
   const [guide, setGuide] = useState<SelfCareGuide | null>(null)
   const [loading, setLoading] = useState(false)
+  const symptomExample = useMemo(() => getRandomSymptomExample(), [])
 
   async function getGuide() {
     if (!symptom.trim() || loading) return
@@ -45,7 +47,7 @@ export default function SelfCarePage() {
           value={symptom}
           onChange={(e) => setSymptom(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && getGuide()}
-          placeholder="증상 입력 (예: 무릎 통증, 두통)"
+          placeholder={`증상 입력 (예: ${symptomExample.text})`}
           className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
         <button

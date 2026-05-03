@@ -1,12 +1,26 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { AcuityBadge } from '@/components/ui/acuity-badge'
+import { RedFlagWarningCard } from '@/components/ui/red-flag-warning-card'
 import type { AcuityLevel } from '@/lib/triage/mts-engine'
+import type { RedFlagWarning } from '@/app/api/triage/route'
+import { getRandomSymptomExample } from '@/lib/constants/symptom-examples'
+import { classifyRedFlags, detectRedFlags, getPatientMessage } from '@/lib/safety/red-flag-classifier'
+import { PREGNANCY_PATTERN, MINOR_PATTERN } from '@/lib/safety/red-flag-data'
+
+const RED_FLAG_DEBOUNCE_MS = 1500
+const RED_FLAG_MIN_INPUT_LENGTH = 5
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
+}
+
+interface CapturedDemographics {
+  pregnancy: boolean
+  isMinor: boolean
+  age: number | null
 }
 
 interface TriageData {
@@ -27,13 +41,87 @@ export default function ChatPage() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [triage, setTriage] = useState<TriageData | null>(null)
+  const [redFlagWarning, setRedFlagWarning] = useState<RedFlagWarning | null>(null)
   const [isListening, setIsListening] = useState(false)
+  const [seniorMode, setSeniorMode] = useState(false)
+  const [capturedDemographics, setCapturedDemographics] = useState<CapturedDemographics>({
+    pregnancy: false,
+    isMinor: false,
+    age: null,
+  })
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const symptomExample = useMemo(() => getRandomSymptomExample(), [])
+
+  // 60+ 모드: localStorage에서 초기값 로드
+  useEffect(() => {
+    const stored = localStorage.getItem('senior_mode')
+    if (stored === 'true') setSeniorMode(true)
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, redFlagWarning])
+
+  // B-1 디바운싱: 입력 정지 후 RED_FLAG_DEBOUNCE_MS ms 경과 시 클라이언트사이드 red_flag 검출
+  useEffect(() => {
+    const trimmed = input.trim()
+    if (trimmed.length < RED_FLAG_MIN_INPUT_LENGTH) return
+
+    const timer = setTimeout(() => {
+      // [1단계] 즉시 응급 키워드 필터
+      const rfResult = classifyRedFlags(trimmed)
+
+      if (rfResult.acuityOverride === 1) {
+        setRedFlagWarning({
+          severity: 'critical',
+          category: '즉시 응급',
+          patient_message: rfResult.emergencyMessage ?? '지금 즉시 119에 신고하거나 응급실로 이동하세요.',
+          dont_miss_diagnoses: [],
+          recommended_action: 'CALL_119',
+        })
+        return
+      }
+
+      // [2단계] Don't Miss 매트릭스 — 누적 인구학(서버 LLM) + 텍스트 패턴(method 2) 병합
+      const pregnancy = capturedDemographics.pregnancy || PREGNANCY_PATTERN.test(trimmed)
+      const isMinor = capturedDemographics.isMinor || MINOR_PATTERN.test(trimmed)
+      const dfResult = detectRedFlags({ rawSymptoms: trimmed, pregnancy, isMinor })
+
+      let warning: RedFlagWarning | null = null
+
+      if (dfResult.is_red_flag && dfResult.matched_category) {
+        const severity = dfResult.urgency === 'immediate' ? 'critical' : 'urgent'
+        warning = {
+          severity,
+          category: dfResult.matched_category,
+          patient_message: getPatientMessage(dfResult),
+          dont_miss_diagnoses: dfResult.dont_miss_diagnoses.map((e) => e.dont_miss_lay_term),
+          recommended_action: severity === 'critical' ? 'CALL_119' : 'GO_ER',
+        }
+      } else if (rfResult.acuityOverride === 2) {
+        warning = {
+          severity: 'urgent',
+          category: '응급 증상',
+          patient_message: rfResult.emergencyMessage ?? '가장 가까운 응급실 또는 응급의료기관으로 이동하세요.',
+          dont_miss_diagnoses: [],
+          recommended_action: 'GO_ER',
+        }
+      }
+
+      if (warning) {
+        // 기존 경고보다 심각할 때만 교체 — 함수형 업데이트로 stale closure 방지
+        setRedFlagWarning((prev) => {
+          const SEVERITY_ORDER: Record<string, number> = { critical: 3, urgent: 2, high: 1 }
+          const incoming = SEVERITY_ORDER[warning!.severity] ?? 0
+          const current = prev ? (SEVERITY_ORDER[prev.severity] ?? 0) : 0
+          return incoming >= current ? warning : prev
+        })
+      }
+    }, RED_FLAG_DEBOUNCE_MS)
+
+    return () => clearTimeout(timer)
+  }, [input, capturedDemographics])
 
   async function sendMessage() {
     if (!input.trim() || loading) return
@@ -62,6 +150,25 @@ export default function ChatPage() {
 
       if (data.triage) {
         setTriage(data.triage)
+      }
+
+      // 서버가 LLM+텍스트로 확정한 인구학 정보를 OR 누적 — 한 번 true는 유지
+      if (data.demographics) {
+        setCapturedDemographics((prev) => ({
+          pregnancy: prev.pregnancy || data.demographics.pregnancy,
+          isMinor: prev.isMinor || data.demographics.isMinor,
+          age: data.demographics.age ?? prev.age,
+        }))
+      }
+
+      // red_flag_warning: 기존 경고보다 더 심각하면 교체, 없으면 제거하지 않음
+      if (data.red_flag_warning) {
+        const SEVERITY_ORDER = { critical: 3, urgent: 2, high: 1 }
+        const incoming = SEVERITY_ORDER[data.red_flag_warning.severity as keyof typeof SEVERITY_ORDER] ?? 0
+        const current = redFlagWarning ? (SEVERITY_ORDER[redFlagWarning.severity] ?? 0) : 0
+        if (incoming >= current) {
+          setRedFlagWarning(data.red_flag_warning)
+        }
       }
     } catch {
       setMessages((prev) => [
@@ -114,6 +221,13 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-10rem)]">
+      {/* critical 경고: 스크롤 영역 밖 상단 고정 — 스크롤해도 항상 노출 */}
+      {redFlagWarning?.severity === 'critical' && (
+        <div className="flex-shrink-0 pb-2">
+          <RedFlagWarningCard warning={redFlagWarning} seniorMode={seniorMode} />
+        </div>
+      )}
+
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto space-y-4 pb-4">
         {messages.map((msg, i) => (
@@ -151,6 +265,11 @@ export default function ChatPage() {
               </span>
             </div>
           </div>
+        )}
+
+        {/* urgent/high 경고: 메시지 스트림 내 인라인 */}
+        {redFlagWarning && redFlagWarning.severity !== 'critical' && (
+          <RedFlagWarningCard warning={redFlagWarning} seniorMode={seniorMode} />
         )}
 
         {/* 트리아지 결과 카드 */}
@@ -204,7 +323,7 @@ export default function ChatPage() {
                 sendMessage()
               }
             }}
-            placeholder="증상을 입력하세요... (예: 무릎이 계단 내려갈 때 시큰거려요)"
+            placeholder={`증상을 입력하세요... (예: ${symptomExample.text})`}
             rows={2}
             className="flex-1 resize-none border border-gray-200 rounded-xl px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
@@ -215,6 +334,43 @@ export default function ChatPage() {
           >
             ➤
           </button>
+          {/*
+           * 119 응급 호출 버튼
+           *
+           * 동작 정책: 옵션 B (원탭 호출, 자동 다이얼 금지)
+           * - tel:119 표준 링크를 통해 OS 표준 전화 발신 인터페이스로 위임
+           * - 사용자가 OS 다이얼링 화면에서 발신 버튼을 명시적으로 눌러야 호출 발생
+           * - 자동 다이얼 코드 사용 안 함
+           *
+           * 법적 근거:
+           * - 응급의료법 및 통신비밀보호법상 자동 통화 발신은 사용자 동의 필요
+           * - tel: 프로토콜은 OS 레벨에서 사용자 동의 절차 보장 (W3C HTML 표준)
+           * - false positive 시 무고한 119 호출 방지를 위해 보수적 정책 채택
+           *
+           * 임상적 근거:
+           * - critical/urgent 시 환자가 1탭으로 119 호출 가능 (응급 골든타임 보장)
+           * - 카드 내부 + 입력창 옆 두 위치에 동일 동작 버튼 노출 (접근성 강화)
+           * - 황 교수님 임상 자문 컨펌 (2026-05-02)
+           */}
+          {/* critical/urgent 시 입력창 옆 119 버튼 상시 노출 (high·null은 미표시) */}
+          {redFlagWarning && redFlagWarning.severity !== 'high' && (
+            <a
+              href="tel:119"
+              aria-label="119 응급 호출"
+              className={`flex-shrink-0 bg-red-600 text-white rounded-xl font-bold flex flex-col items-center justify-center gap-0.5 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors ${
+                redFlagWarning.severity === 'critical'
+                  ? seniorMode
+                    ? 'min-w-[56px] min-h-[56px] text-base animate-pulse'
+                    : 'min-w-[48px] min-h-[48px] text-sm animate-pulse'
+                  : seniorMode
+                    ? 'min-w-[52px] min-h-[52px] text-base'
+                    : 'min-w-[44px] min-h-[44px] text-xs'
+              }`}
+            >
+              <span>📞</span>
+              <span>119</span>
+            </a>
+          )}
         </div>
       </div>
     </div>

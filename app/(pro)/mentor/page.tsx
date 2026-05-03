@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { CitationModal } from '@/components/ui/citation-modal'
+import { getProSpecialtyCode } from '@/lib/utils/pro-context'
 import type { Citation } from '@/lib/db/schema'
 
 interface MentorMessage {
@@ -35,6 +36,7 @@ export default function MentorPage() {
     setLoading(true)
 
     try {
+      const specialty = getProSpecialtyCode()
       const res = await fetch('/api/rag', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,6 +44,7 @@ export default function MentorPage() {
           query: question,
           persona: 'doctor',
           type: 'mentor',
+          specialty,
         }),
       })
       const data = await res.json()

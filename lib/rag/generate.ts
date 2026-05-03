@@ -39,11 +39,16 @@ export async function generateAnswer(opts: GenerateOptions): Promise<GenerateRes
       ? '일상어로 쉽게 설명하라. 의학 용어가 필요하면 괄호 안에 쉬운 말로 병기하라.'
       : '의료 전문 용어와 ICD-10 코드를 사용하라. 한국 의료 환경(보험 급여, 식약처 허가)도 반드시 언급하라.'
 
-  const systemPrompt = systemContext ?? `당신은 한국의 의료 정보 시스템입니다. 다음 규칙을 반드시 따르라:
+  const baseSystemPrompt = `당신은 한국의 의료 정보 시스템입니다. 다음 규칙을 반드시 따르라:
 1. 주어진 [근거] 자료에 있는 사실만 답하라. 근거에 없는 사실은 "근거 부족"이라 명시하라.
 2. 모든 사실 주장에 [1], [2] 형태로 인용 번호를 붙여라.
 3. ${languageInstruction}
 4. 진단·처방·치료 결정을 단정짓지 마라.`
+
+  // systemContext는 base를 대체하지 않고 append되는 추가 컨텍스트
+  const systemPrompt = systemContext
+    ? `${baseSystemPrompt}\n\n${systemContext}`
+    : baseSystemPrompt
 
   const userPrompt = `[근거 자료]\n${context}\n\n[질문]\n${query}`
 

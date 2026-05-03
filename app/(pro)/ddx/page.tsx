@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { getRandomClinicalCase } from '@/lib/constants/clinical-case-examples'
 import { CitationModal } from '@/components/ui/citation-modal'
+import { getProSpecialtyCode } from '@/lib/utils/pro-context'
 import type { Citation } from '@/lib/db/schema'
 
 interface DDxItem {
@@ -40,15 +42,17 @@ export default function DDxPage() {
   })
   const [result, setResult] = useState<DDxResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const caseExample = useMemo(() => getRandomClinicalCase(), [])
 
   async function runDDx() {
     if (!form.chief_complaint.trim()) return
     setLoading(true)
     try {
+      const specialty = getProSpecialtyCode()
       const res = await fetch('/api/ddx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, specialty }),
       })
       const data = await res.json()
       setResult(data)
@@ -74,7 +78,7 @@ export default function DDxPage() {
             <input
               value={form.chief_complaint}
               onChange={(e) => setForm((f) => ({ ...f, chief_complaint: e.target.value }))}
-              placeholder="예: RUQ pain 3일, 발열 38.2°C"
+              placeholder={`예: ${caseExample.chief_complaint}`}
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
@@ -106,7 +110,7 @@ export default function DDxPage() {
           <textarea
             value={form.hpi}
             onChange={(e) => setForm((f) => ({ ...f, hpi: e.target.value }))}
-            placeholder="Murphy sign 양성, 오심 동반, 식후 악화..."
+            placeholder={caseExample.hpi}
             rows={2}
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
@@ -118,7 +122,7 @@ export default function DDxPage() {
             <textarea
               value={form.exam}
               onChange={(e) => setForm((f) => ({ ...f, exam: e.target.value }))}
-              placeholder="BP 120/80, HR 92, T 38.2°C, Murphy sign (+)"
+              placeholder={caseExample.physical_exam}
               rows={2}
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
@@ -128,7 +132,7 @@ export default function DDxPage() {
             <textarea
               value={form.labs}
               onChange={(e) => setForm((f) => ({ ...f, labs: e.target.value }))}
-              placeholder="WBC 13,500, CRP 4.2, LFT 정상..."
+              placeholder={caseExample.lab_results}
               rows={2}
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
             />

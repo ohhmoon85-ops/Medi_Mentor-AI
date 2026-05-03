@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { getRandomSymptomExample } from '@/lib/constants/symptom-examples'
 
 interface DiaryEntry {
   id: string
@@ -14,6 +15,7 @@ export default function DiaryPage() {
   const [entries, setEntries] = useState<DiaryEntry[]>([])
   const [form, setForm] = useState({ symptom: '', severity: 5, note: '' })
   const [showForm, setShowForm] = useState(false)
+  const symptomExample = useMemo(() => getRandomSymptomExample(), [])
 
   useEffect(() => {
     const saved = localStorage.getItem('symptom_diary')
@@ -56,7 +58,7 @@ export default function DiaryPage() {
             <input
               value={form.symptom}
               onChange={(e) => setForm((f) => ({ ...f, symptom: e.target.value }))}
-              placeholder="예: 무릎 통증"
+              placeholder={`예: ${symptomExample.text}`}
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
