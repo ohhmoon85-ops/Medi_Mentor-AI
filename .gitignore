@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +40,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# G1-4 메트릭 로그 (알파 단계 임시, 공개 출시 시 DB로 교체)
+/logs/metrics/
+
+# G1-5 동의 기록 로그
+/logs/consent/
+
+# G1-1 검증 보고서 (디렉토리는 추적, 보고서 파일만 제외)
+/docs/alpha/validation_reports/*.json

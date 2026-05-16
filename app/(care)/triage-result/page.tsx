@@ -1,17 +1,31 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { AcuityBadge } from '@/components/ui/acuity-badge'
 import type { AcuityLevel } from '@/lib/triage/mts-engine'
 import { ACUITY_CONFIG } from '@/lib/triage/mts-engine'
+import { FeedbackEntryButton } from '@/components/care/feedback/feedback-entry-button'
+import { collectMetric, getAnonymousSessionHash } from '@/lib/care/metrics/metrics-collector'
 
 function TriageResultContent() {
   const params = useSearchParams()
   const level = (parseInt(params.get('level') ?? '4') || 4) as AcuityLevel
   const department = params.get('dept') ?? '가정의학과'
   const config = ACUITY_CONFIG[level]
+
+  // M3 placeholder: 라우팅 결과 발행 사실 1회 기록 (해석 B, v13 §3.2 D-3 정합).
+  // visited_er/routing_appropriate 는 시스템 자가 평가 — 사후 follow-up 갱신은 별도 wire-in.
+  useEffect(() => {
+    collectMetric({
+      metric_type:         'M3_emergency_routing',
+      session_hash:        getAnonymousSessionHash(),
+      triage_level:        `L${level}`,
+      visited_er:          false,
+      routing_appropriate: true,
+    })
+  }, [level])
 
   return (
     <div className="space-y-5">
@@ -43,6 +57,8 @@ function TriageResultContent() {
           🌿 자가관리 방법
         </Link>
       </div>
+
+      <FeedbackEntryButton />
 
       <Link
         href="/care"

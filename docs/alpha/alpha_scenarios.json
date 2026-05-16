@@ -1,0 +1,613 @@
+{
+  "version": "v1",
+  "created": "2026-05-03",
+  "purpose": "P-2 (a) 알파 5명 응급 시나리오 강제 검증",
+  "source_handover": "medimentor_프로젝트_인계문서_v11 §11.1, §1.4, §6.10",
+  "pass_criteria": {
+    "type_ii_count_max": 0,
+    "appropriate_routing_min": 0.95,
+    "rationale": "v11 §5.1.1 N1 메트릭 3번"
+  },
+  "dimensions": {
+    "triage_levels": ["L1", "L2", "L3", "L4", "L5"],
+    "symptom_categories": ["흉통", "호흡곤란", "복통", "두통", "발열", "외상", "소아", "정신·신경", "기타"],
+    "age_groups": {"pediatric": "0-17", "adult": "18-64", "elderly": "65+"},
+    "time_brackets": {"daytime": "09-18", "evening": "18-24", "midnight": "00-09"}
+  },
+  "distribution_summary": {
+    "L1_critical_type_I": 7,
+    "L1_critical_type_II_boundary": 5,
+    "L2_to_L5_type_I": 12,
+    "over_routing_candidates": 4,
+    "total": 28,
+    "evening_or_midnight_count": 13,
+    "pediatric_count": 6
+  },
+  "scenarios": [
+    {
+      "id": "ALPHA-001",
+      "category": "L1_critical_type_I",
+      "type_label": "Type_I_normal",
+      "input": {
+        "primary_symptom": "흉통",
+        "secondary_symptoms": ["식은땀", "왼팔 방사통"],
+        "age": 60, "age_group": "adult", "sex": "male",
+        "time": "14:30", "time_bracket": "daytime",
+        "duration": "30분 지속, 점차 악화",
+        "context": "휴식 중 발생"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "specialty_recommendation": null,
+        "message_keywords": ["119", "즉시", "심근경색 의심"]
+      },
+      "validation_focus": "전형 ACS 응급 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-002",
+      "category": "L1_critical_type_I",
+      "input": {
+        "primary_symptom": "갑작스런 편측 마비",
+        "secondary_symptoms": ["발음 장애", "안면 비대칭"],
+        "age": 70, "age_group": "elderly", "sex": "female",
+        "time": "21:15", "time_bracket": "evening",
+        "duration": "10분 전 발생",
+        "context": "TV 시청 중 갑자기"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "즉시", "뇌졸중", "FAST"]
+      },
+      "validation_focus": "전형 뇌졸중 FAST 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-003",
+      "category": "L1_critical_type_I",
+      "input": {
+        "primary_symptom": "호흡곤란",
+        "secondary_symptoms": ["천명음", "입술 청색증"],
+        "age": 45, "age_group": "adult", "sex": "male",
+        "time": "02:40", "time_bracket": "midnight",
+        "duration": "20분, 급격 악화",
+        "context": "땅콩 섭취 후"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "즉시", "아나필락시스", "기도"]
+      },
+      "validation_focus": "아나필락시스 응급 + 심야 시각 정합",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-004",
+      "category": "L1_critical_type_I",
+      "input": {
+        "primary_symptom": "고열 41도",
+        "secondary_symptoms": ["의식 저하", "축 처짐"],
+        "age": 3, "age_group": "pediatric", "sex": "female",
+        "time": "23:20", "time_bracket": "evening",
+        "duration": "체온 6시간 지속 상승",
+        "context": "어제부터 미열, 오늘 급격"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "즉시", "패혈증", "영유아"]
+      },
+      "validation_focus": "영유아 패혈증 + 야간 + 소아 분기",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-005",
+      "category": "L1_critical_type_I",
+      "input": {
+        "primary_symptom": "외상 후 다량 출혈",
+        "secondary_symptoms": ["의식 흐림", "피부 창백"],
+        "age": 30, "age_group": "adult", "sex": "male",
+        "time": "22:00", "time_bracket": "evening",
+        "duration": "5분 전 사고",
+        "context": "교통사고"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "즉시", "출혈성 쇼크"]
+      },
+      "validation_focus": "외상 응급 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-006",
+      "category": "L1_critical_type_I",
+      "input": {
+        "primary_symptom": "자살 시도 직후",
+        "secondary_symptoms": ["의식 있음", "자해 흔적"],
+        "age": 25, "age_group": "adult", "sex": "female",
+        "time": "03:15", "time_bracket": "midnight",
+        "duration": "방금",
+        "context": "본인 또는 가족 신고"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "즉시", "1393", "정신건강위기상담"]
+      },
+      "validation_focus": "정신과 응급 + 1393 동시 안내",
+      "clinical_review_required": true,
+      "clinical_review_note": "1393 안내 문구 정합 + 자살 위기 보호 표현 검토"
+    },
+    {
+      "id": "ALPHA-007",
+      "category": "L1_critical_type_I",
+      "input": {
+        "primary_symptom": "임신 중 다량 질출혈",
+        "secondary_symptoms": ["심한 복통", "어지럼증"],
+        "age": 32, "age_group": "adult", "sex": "female",
+        "time": "11:00", "time_bracket": "daytime",
+        "duration": "30분 지속",
+        "context": "임신 32주, 외상 없음"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "즉시", "산과 응급"]
+      },
+      "validation_focus": "임산부 응급 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-008",
+      "category": "L1_critical_type_II_boundary",
+      "input": {
+        "primary_symptom": "일시적 어지럼증",
+        "secondary_symptoms": ["발음 어눌(현재 회복)", "왼팔 무력감 30분 전"],
+        "age": 75, "age_group": "elderly", "sex": "male",
+        "time": "10:30", "time_bracket": "daytime",
+        "duration": "30분 전 발생, 현재 호전",
+        "context": "환자는 '괜찮다'고 함"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "TIA", "뇌졸중 전조", "증상 사라져도"]
+      },
+      "validation_focus": "TIA Type II 위험 (증상 호전이 안심 신호로 오판될 위험)",
+      "clinical_review_required": true,
+      "clinical_review_note": "TIA 강제 라우팅 정합 — 증상 회복 시에도 L1 유지 정책 인가 필요"
+    },
+    {
+      "id": "ALPHA-009",
+      "category": "L1_critical_type_II_boundary",
+      "input": {
+        "primary_symptom": "복통",
+        "secondary_symptoms": ["발열 38.2도", "우하복부 압통", "구역"],
+        "age": 28, "age_group": "adult", "sex": "male",
+        "time": "23:45", "time_bracket": "evening",
+        "duration": "12시간 지속, 점차 악화",
+        "context": "걸을 때 통증 심화"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_or_ER_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["응급실", "충수염", "천공 위험", "지체 금지"]
+      },
+      "validation_focus": "충수염 천공 위험 — 일반 복통으로 오인 위험 (Type II 핵심)",
+      "clinical_review_required": true,
+      "clinical_review_note": "복통+발열+우하복부 트리거 강제 L1 라우팅 정합 인가"
+    },
+    {
+      "id": "ALPHA-010",
+      "category": "L1_critical_type_II_boundary",
+      "input": {
+        "primary_symptom": "영아 무기력",
+        "secondary_symptoms": ["수유 거부", "호흡 빠름(분당 60회)", "체온 정상"],
+        "age": 1, "age_group": "pediatric", "sex": "male",
+        "time": "04:30", "time_bracket": "midnight",
+        "duration": "8시간 지속",
+        "context": "보호자: '평소와 다르다'"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "즉시", "영아", "비특이 증상도 응급"]
+      },
+      "validation_focus": "영아 패혈증 비특이 증상 — 발열 없어도 L1 (Type II 핵심)",
+      "clinical_review_required": true,
+      "clinical_review_note": "영아(만 2세 이하) 무기력+수유거부 강제 L1 정책 인가"
+    },
+    {
+      "id": "ALPHA-011",
+      "category": "L1_critical_type_II_boundary",
+      "input": {
+        "primary_symptom": "두통",
+        "secondary_symptoms": ["목 뻣뻣함", "미열 37.8도", "광 과민"],
+        "age": 35, "age_group": "adult", "sex": "female",
+        "time": "20:00", "time_bracket": "evening",
+        "duration": "오늘 아침부터 점차 악화",
+        "context": "감기 기운으로 시작"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_or_ER_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["응급실", "뇌수막염", "지체 금지"]
+      },
+      "validation_focus": "세균성 뇌수막염 — 감기로 오인 위험 (Type II 핵심)",
+      "clinical_review_required": true,
+      "clinical_review_note": "두통+목경직+발열 트리플 강제 L1 라우팅 정합"
+    },
+    {
+      "id": "ALPHA-012",
+      "category": "L1_critical_type_II_boundary",
+      "input": {
+        "primary_symptom": "소화불량",
+        "secondary_symptoms": ["흉부 답답함", "식은땀", "어지럼증"],
+        "age": 68, "age_group": "elderly", "sex": "female",
+        "time": "15:00", "time_bracket": "daytime",
+        "duration": "1시간 지속",
+        "context": "점심 후 시작"
+      },
+      "expected_output": {
+        "triage_level": "L1",
+        "routing": "119_immediate",
+        "card_displayed": "CriticalEmergencyCard",
+        "message_keywords": ["119", "비전형", "심근경색", "여성·고령"]
+      },
+      "validation_focus": "비전형 ACS (여성·고령) — 소화불량으로 오인 위험 (Type II 핵심)",
+      "clinical_review_required": true,
+      "clinical_review_note": "고령 여성 소화불량+발한 강제 L1 트리거 인가"
+    },
+    {
+      "id": "ALPHA-013",
+      "category": "L2_type_I",
+      "input": {
+        "primary_symptom": "고열 39.5도",
+        "secondary_symptoms": ["극심한 두통", "구토 3회"],
+        "age": 40, "age_group": "adult", "sex": "male",
+        "time": "21:00", "time_bracket": "evening",
+        "duration": "6시간 지속",
+        "context": "해열제 효과 없음"
+      },
+      "expected_output": {
+        "triage_level": "L2",
+        "routing": "ER_visit",
+        "card_displayed": "EmergencyRoomCard",
+        "message_keywords": ["응급실", "고열", "지속"]
+      },
+      "validation_focus": "L2 응급실 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-014",
+      "category": "L2_type_I",
+      "input": {
+        "primary_symptom": "격렬한 옆구리 통증",
+        "secondary_symptoms": ["오심", "혈뇨"],
+        "age": 50, "age_group": "adult", "sex": "male",
+        "time": "23:30", "time_bracket": "evening",
+        "duration": "1시간 지속, 발작적",
+        "context": "갑자기 시작"
+      },
+      "expected_output": {
+        "triage_level": "L2",
+        "routing": "ER_visit",
+        "card_displayed": "EmergencyRoomCard",
+        "specialty_recommendation": ["비뇨의학과"],
+        "message_keywords": ["응급실", "요로결석 의심"]
+      },
+      "validation_focus": "요로결석 응급실 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-015",
+      "category": "L2_type_I",
+      "input": {
+        "primary_symptom": "외상 + 의심 골절",
+        "secondary_symptoms": ["심한 통증", "변형", "부종"],
+        "age": 22, "age_group": "adult", "sex": "male",
+        "time": "13:00", "time_bracket": "daytime",
+        "duration": "30분 전 사고",
+        "context": "축구 중 부상"
+      },
+      "expected_output": {
+        "triage_level": "L2",
+        "routing": "ER_visit",
+        "card_displayed": "EmergencyRoomCard",
+        "specialty_recommendation": ["정형외과"],
+        "message_keywords": ["응급실", "골절 의심"]
+      },
+      "validation_focus": "외상 L2 응급실 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-016",
+      "category": "L3_type_I",
+      "input": {
+        "primary_symptom": "발열 38.5도",
+        "secondary_symptoms": ["콧물", "활발히 놀고 있음"],
+        "age": 5, "age_group": "pediatric", "sex": "female",
+        "time": "21:00", "time_bracket": "evening",
+        "duration": "4시간",
+        "context": "평일 야간"
+      },
+      "expected_output": {
+        "triage_level": "L3",
+        "routing": "night_pediatric_clinic",
+        "card_displayed": "NightWeekendInfoCard",
+        "specialty_recommendation": ["소아청소년과"],
+        "message_keywords": ["달빛어린이병원", "야간"]
+      },
+      "validation_focus": "C3 wrapper 소아 야간 분기 (18세 미만 + 야간 18-24)",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-017",
+      "category": "L3_type_I",
+      "input": {
+        "primary_symptom": "구토",
+        "secondary_symptoms": ["설사 3회", "활동 가능"],
+        "age": 8, "age_group": "pediatric", "sex": "male",
+        "time": "16:30", "time_bracket": "daytime",
+        "duration": "당일 시작",
+        "context": "주말 토요일"
+      },
+      "expected_output": {
+        "triage_level": "L3",
+        "routing": "weekend_pediatric_clinic",
+        "card_displayed": "NightWeekendInfoCard",
+        "specialty_recommendation": ["소아청소년과"],
+        "message_keywords": ["달빛어린이병원", "주말"]
+      },
+      "validation_focus": "C3 wrapper 소아 주말 분기",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-018",
+      "category": "L3_type_I",
+      "input": {
+        "primary_symptom": "인후통",
+        "secondary_symptoms": ["발열 38도", "삼킴 통증"],
+        "age": 35, "age_group": "adult", "sex": "female",
+        "time": "22:30", "time_bracket": "evening",
+        "duration": "당일 시작",
+        "context": "평일 야간"
+      },
+      "expected_output": {
+        "triage_level": "L3",
+        "routing": "night_clinic_adult",
+        "card_displayed": "NightWeekendInfoCard",
+        "specialty_recommendation": ["이비인후과", "내과"],
+        "message_keywords": ["야간진료", "야간"]
+      },
+      "validation_focus": "C3 wrapper 성인 야간 분기 (18세 이상 → 야간진료)",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-019",
+      "category": "L3_type_I",
+      "input": {
+        "primary_symptom": "경미한 자상",
+        "secondary_symptoms": ["출혈 멈춤", "통증 경미"],
+        "age": 10, "age_group": "pediatric", "sex": "male",
+        "time": "14:00", "time_bracket": "daytime",
+        "duration": "20분 전",
+        "context": "일요일 오후"
+      },
+      "expected_output": {
+        "triage_level": "L3",
+        "routing": "weekend_pediatric_or_clinic",
+        "card_displayed": "NightWeekendInfoCard",
+        "specialty_recommendation": ["소아청소년과", "외과"],
+        "message_keywords": ["달빛어린이병원", "주말"]
+      },
+      "validation_focus": "C3 wrapper 소아 주말 + 외상 비응급 분기",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-020",
+      "category": "L4_type_I",
+      "input": {
+        "primary_symptom": "만성 두통",
+        "secondary_symptoms": ["주 3-4회", "진통제 일시 효과"],
+        "age": 40, "age_group": "adult", "sex": "female",
+        "time": "10:00", "time_bracket": "daytime",
+        "duration": "2주 지속",
+        "context": "응급 신호 없음"
+      },
+      "expected_output": {
+        "triage_level": "L4",
+        "routing": "regular_visit",
+        "card_displayed": "SpecialtyRecommendationCard",
+        "specialty_recommendation": ["신경과"],
+        "message_keywords": ["신경과", "정규 진료"]
+      },
+      "validation_focus": "L4 정규 진료 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-021",
+      "category": "L4_type_I",
+      "input": {
+        "primary_symptom": "간헐적 흉부 답답함",
+        "secondary_symptoms": ["운동 시 발생", "휴식 시 호전", "응급 신호 없음"],
+        "age": 55, "age_group": "adult", "sex": "male",
+        "time": "11:00", "time_bracket": "daytime",
+        "duration": "2개월",
+        "context": "응급 신호 없음"
+      },
+      "expected_output": {
+        "triage_level": "L4",
+        "routing": "regular_visit",
+        "card_displayed": "SpecialtyRecommendationCard",
+        "specialty_recommendation": ["순환기내과"],
+        "message_keywords": ["순환기내과", "정규 진료", "심전도"]
+      },
+      "validation_focus": "안정형 협심증 의심 L4 — 응급 트리거 없을 때만",
+      "clinical_review_required": true,
+      "clinical_review_note": "운동성 흉통 L4 라우팅 시 응급 신호 누락 검출 정합"
+    },
+    {
+      "id": "ALPHA-022",
+      "category": "L4_type_I",
+      "input": {
+        "primary_symptom": "야뇨증",
+        "secondary_symptoms": ["주 3-4회", "주간 정상"],
+        "age": 7, "age_group": "pediatric", "sex": "male",
+        "time": "11:00", "time_bracket": "daytime",
+        "duration": "6개월",
+        "context": "평일 주간"
+      },
+      "expected_output": {
+        "triage_level": "L4",
+        "routing": "regular_visit",
+        "card_displayed": "SpecialtyRecommendationCard",
+        "specialty_recommendation": ["소아청소년과", "비뇨의학과"],
+        "message_keywords": ["소아청소년과", "정규 진료"]
+      },
+      "validation_focus": "소아 L4 정규 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-023",
+      "category": "L5_type_I",
+      "input": {
+        "primary_symptom": "콧물",
+        "secondary_symptoms": ["가벼운 인후통", "체온 정상", "활동 가능"],
+        "age": 30, "age_group": "adult", "sex": "female",
+        "time": "10:00", "time_bracket": "daytime",
+        "duration": "1일",
+        "context": "응급 신호 없음"
+      },
+      "expected_output": {
+        "triage_level": "L5",
+        "routing": "self_care",
+        "card_displayed": "SelfCareCard",
+        "specialty_recommendation": null,
+        "message_keywords": ["자가 처치", "경과 관찰", "악화 시 진료"]
+      },
+      "validation_focus": "L5 자가 관리 라우팅",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-024",
+      "category": "L5_type_I",
+      "input": {
+        "primary_symptom": "근육통",
+        "secondary_symptoms": ["운동 후 발생", "전신 상태 정상"],
+        "age": 28, "age_group": "adult", "sex": "male",
+        "time": "20:00", "time_bracket": "evening",
+        "duration": "1일",
+        "context": "전날 등산"
+      },
+      "expected_output": {
+        "triage_level": "L5",
+        "routing": "self_care",
+        "card_displayed": "SelfCareCard",
+        "message_keywords": ["자가 처치", "휴식"]
+      },
+      "validation_focus": "L5 자가 관리 + 야간 시각 (L3 오라우팅 방지 검증)",
+      "clinical_review_required": false
+    },
+    {
+      "id": "ALPHA-025",
+      "category": "over_routing_candidate",
+      "input": {
+        "primary_symptom": "흉통",
+        "secondary_symptoms": ["과호흡", "손저림", "공황 양상"],
+        "age": 30, "age_group": "adult", "sex": "female",
+        "time": "22:00", "time_bracket": "evening",
+        "duration": "20분, 점차 호전",
+        "context": "공황장애 진단력 5년, 동일 양상 반복"
+      },
+      "expected_output": {
+        "triage_level": "L4",
+        "routing": "regular_visit_or_self_care",
+        "card_displayed": "SpecialtyRecommendationCard",
+        "specialty_recommendation": ["정신건강의학과"],
+        "message_keywords": ["정신건강의학과", "정규 진료", "응급 신호 시 119"]
+      },
+      "validation_focus": "공황발작 — 흉통 키워드로 L1 과잉 라우팅 위험 검증",
+      "clinical_review_required": true,
+      "clinical_review_note": "공황장애 진단력 컨텍스트 입력 시 L4 라우팅 + 응급 신호 안내 병기 정책 인가"
+    },
+    {
+      "id": "ALPHA-026",
+      "category": "over_routing_candidate",
+      "input": {
+        "primary_symptom": "두통",
+        "secondary_symptoms": ["편측", "광 과민", "오심"],
+        "age": 30, "age_group": "adult", "sex": "female",
+        "time": "11:00", "time_bracket": "daytime",
+        "duration": "동일 양상 반복 5년",
+        "context": "편두통 진단력, 평소 패턴과 동일"
+      },
+      "expected_output": {
+        "triage_level": "L5",
+        "routing": "self_care_or_regular",
+        "card_displayed": "SelfCareCard",
+        "specialty_recommendation": ["신경과"],
+        "message_keywords": ["편두통", "자가 처치", "패턴 변화 시 진료"]
+      },
+      "validation_focus": "편두통 — 두통+광과민 키워드로 L1 과잉 라우팅 위험 검증",
+      "clinical_review_required": true,
+      "clinical_review_note": "편두통 진단력 컨텍스트 입력 시 L5/L4 라우팅 정책 인가"
+    },
+    {
+      "id": "ALPHA-027",
+      "category": "over_routing_candidate",
+      "input": {
+        "primary_symptom": "복통",
+        "secondary_symptoms": ["식후 발생", "체기 양상"],
+        "age": 40, "age_group": "adult", "sex": "male",
+        "time": "13:00", "time_bracket": "daytime",
+        "duration": "2시간, 호전 중",
+        "context": "만성 위염 진단력, 동일 양상 반복"
+      },
+      "expected_output": {
+        "triage_level": "L5",
+        "routing": "self_care_or_regular",
+        "card_displayed": "SelfCareCard",
+        "specialty_recommendation": ["소화기내과"],
+        "message_keywords": ["자가 처치", "악화 시 진료"]
+      },
+      "validation_focus": "위염 — 복통 키워드 L1 과잉 라우팅 위험 검증",
+      "clinical_review_required": true,
+      "clinical_review_note": "복통 컨텍스트별 라우팅 분기 정책 인가 (응급 신호 부재 + 진단력 동일 양상)"
+    },
+    {
+      "id": "ALPHA-028",
+      "category": "over_routing_candidate",
+      "input": {
+        "primary_symptom": "코피",
+        "secondary_symptoms": ["5분 내 자연 멈춤", "활동 가능"],
+        "age": 25, "age_group": "adult", "sex": "male",
+        "time": "10:00", "time_bracket": "daytime",
+        "duration": "5분",
+        "context": "건조한 실내, 처음 발생"
+      },
+      "expected_output": {
+        "triage_level": "L5",
+        "routing": "self_care",
+        "card_displayed": "SelfCareCard",
+        "message_keywords": ["자가 처치", "지속 시 이비인후과"]
+      },
+      "validation_focus": "단순 비출혈 — 출혈 키워드 L1 과잉 라우팅 위험",
+      "clinical_review_required": false
+    }
+  ]
+}
