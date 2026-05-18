@@ -10,13 +10,14 @@
  *   (d) 알파 단계 피드백 제공 의사
  *
  * 알파 코드: 환경변수 ALPHA_USER_CODES (콤마 구분 5건)
- * 동의 완료: logs/consent/<alpha_code>.json 저장
- * logs/consent/ 는 .gitignore 등록됨
+ * 동의 완료: Vercel Blob `consent/<alpha_code>.json` 저장 (G3-3 A안 마이그레이션)
+ *   - 환경 변수: BLOB_READ_WRITE_TOKEN (Vercel 배포 시 자동 주입)
+ *   - access: 'public' (Vercel Blob v2: private 미지원, addRandomSuffix=false 로 URL 추측 차단)
+ *   - 스키마 1bit 보존: alpha_code + consented_at + session_hash + checks{a,b,c,d}
  */
 
 import { redirect } from 'next/navigation'
-import fs from 'fs'
-import path from 'path'
+import { put } from '@vercel/blob'
 
 // ─── 서버 액션 ─────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ export async function submitConsent(formData: FormData): Promise<void> {
     redirect('/care/alpha-consent?error=incomplete')
   }
 
-  // logs/consent/ 저장
+  // Vercel Blob `consent/<alpha_code>.json` 저장 (스키마 G3-2 W-4 §5.2 보존)
   const consentRecord = {
     alpha_code:    alphaCode,
     consented_at:  new Date().toISOString(),
@@ -59,12 +60,14 @@ export async function submitConsent(formData: FormData): Promise<void> {
   }
 
   try {
-    const logsDir = path.join(process.cwd(), 'logs', 'consent')
-    fs.mkdirSync(logsDir, { recursive: true })
-    fs.writeFileSync(
-      path.join(logsDir, `${alphaCode}.json`),
+    await put(
+      `consent/${alphaCode}.json`,
       JSON.stringify(consentRecord, null, 2),
-      'utf8',
+      {
+        access:           'public',
+        addRandomSuffix:  false,
+        contentType:      'application/json',
+      },
     )
   } catch {
     // 로그 저장 실패는 동의 완료 흐름에 영향 주지 않음

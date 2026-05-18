@@ -53,9 +53,11 @@ if (existsSync(formPath)) {
   assert('T3-7 동의 항목 (b) 응급 도구 아님', content.includes('응급 상황 판단 도구'))
   assert('T3-8 동의 항목 (c) 로그 동의', content.includes('통계·운영 로그'))
   assert('T3-9 동의 항목 (d) 피드백 의사', content.includes('피드백'))
-  assert('T3-10 logs/consent 저장', content.includes("'consent'"))
+  assert('T3-10 consent/ 경로 저장 (Vercel Blob)', content.includes('consent/'))
   assert('T3-11 invalid_code 에러 처리', content.includes('invalid_code'))
   assert('T3-12 incomplete 에러 처리', content.includes('incomplete'))
+  assert('T3-13 @vercel/blob import (G3-3 마이그레이션)', content.includes('@vercel/blob'))
+  assert('T3-14 put() Blob SDK 호출', content.includes('put('))
 }
 
 // ─── T4: alpha-consent 페이지 구조 확인 ──────────────────────
