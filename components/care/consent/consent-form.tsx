@@ -128,7 +128,7 @@ export async function ConsentForm({ error, success }: ConsentFormProps) {
           type="text"
           required
           placeholder="예: ALPHA-MM-001"
-          className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-teal-400"
+          className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-base placeholder:text-gray-500 focus:outline-none focus:border-teal-400"
           aria-describedby="alpha_code_hint"
         />
         <p id="alpha_code_hint" className="text-xs text-gray-400">

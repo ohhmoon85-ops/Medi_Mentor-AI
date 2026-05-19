@@ -325,7 +325,7 @@ export default function ChatPage() {
             }}
             placeholder={`증상을 입력하세요... (예: ${symptomExample.text})`}
             rows={2}
-            className="flex-1 resize-none border border-gray-200 rounded-xl px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="flex-1 resize-none border border-gray-200 rounded-xl px-3 py-2 text-base placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
           <button
             onClick={sendMessage}

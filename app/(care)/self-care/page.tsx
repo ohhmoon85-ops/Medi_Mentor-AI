@@ -48,7 +48,7 @@ export default function SelfCarePage() {
           onChange={(e) => setSymptom(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && getGuide()}
           placeholder={`증상 입력 (예: ${symptomExample.text})`}
-          className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-base placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
         <button
           onClick={getGuide}
