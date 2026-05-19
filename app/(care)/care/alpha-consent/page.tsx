@@ -10,12 +10,13 @@
 import { ConsentForm } from '@/components/care/consent/consent-form'
 
 interface AlphaConsentPageProps {
-  searchParams: { error?: string; success?: string }
+  searchParams: Promise<{ error?: string; success?: string }>
 }
 
-export default function AlphaConsentPage({ searchParams }: AlphaConsentPageProps) {
-  const error   = searchParams.error ?? null
-  const success = searchParams.success === '1'
+export default async function AlphaConsentPage({ searchParams }: AlphaConsentPageProps) {
+  const params = await searchParams
+  const error   = params.error ?? null
+  const success = params.success === '1'
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
