@@ -17,6 +17,7 @@
  */
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { put } from '@vercel/blob'
 
 // ─── 서버 액션 ─────────────────────────────────────────────────
@@ -86,13 +87,19 @@ interface ConsentFormProps {
 export async function ConsentForm({ error, success }: ConsentFormProps) {
   if (success) {
     return (
-      <div className="space-y-4 text-center">
+      <div className="space-y-6 text-center">
         <p className="text-2xl font-bold text-teal-700">✅ 동의 완료</p>
         <p className="text-gray-600">
           알파 테스트에 참여해 주셔서 감사합니다.
           <br />
           진료 지원 서비스를 이용하실 수 있습니다.
         </p>
+        <Link
+          href="/chat"
+          className="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-2xl px-8 py-3 transition-colors"
+        >
+          진료 지원 서비스 시작하기 →
+        </Link>
       </div>
     )
   }
