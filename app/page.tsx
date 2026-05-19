@@ -18,7 +18,7 @@ export default function HomePage() {
         {/* 두 가지 입구 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Link
-            href="/care"
+            href="/care/alpha-consent"
             className="bg-white rounded-3xl p-7 text-left hover:shadow-2xl transition-all hover:-translate-y-1 group"
           >
             <div className="text-4xl mb-3">💬</div>
@@ -35,7 +35,7 @@ export default function HomePage() {
           </Link>
 
           <Link
-            href="/pro/verify"
+            href="/verify"
             className="bg-gray-900 border border-gray-700 rounded-3xl p-7 text-left hover:shadow-2xl transition-all hover:-translate-y-1 group"
           >
             <div className="text-4xl mb-3">⚕️</div>

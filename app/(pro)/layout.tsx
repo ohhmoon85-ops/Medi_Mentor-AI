@@ -20,7 +20,7 @@ export default function ProLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/care"
+              href="/"
               className="text-xs text-gray-400 hover:text-gray-600"
             >
               ← 환자용 Care

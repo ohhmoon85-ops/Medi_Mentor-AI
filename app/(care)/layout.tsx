@@ -20,7 +20,7 @@ export default function CareLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <a
-            href="/pro/verify"
+            href="/verify"
             className="text-xs bg-blue-700 hover:bg-blue-600 rounded-full px-3 py-1.5 transition-colors"
           >
             의사용 Pro →

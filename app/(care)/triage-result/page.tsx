@@ -45,13 +45,13 @@ function TriageResultContent() {
 
       <div className="grid grid-cols-2 gap-3">
         <Link
-          href="/care/hospitals"
+          href="/hospitals"
           className="bg-[#10B981] text-white rounded-2xl p-4 text-center font-semibold hover:bg-emerald-600 transition-colors"
         >
           🗺️ 근처 병원 찾기
         </Link>
         <Link
-          href="/care/self-care"
+          href="/self-care"
           className="bg-white border-2 border-[#003876] text-[#003876] rounded-2xl p-4 text-center font-semibold hover:bg-blue-50 transition-colors"
         >
           🌿 자가관리 방법
@@ -61,7 +61,7 @@ function TriageResultContent() {
       <FeedbackEntryButton />
 
       <Link
-        href="/care"
+        href="/"
         className="block text-center text-gray-400 text-sm hover:text-gray-600 pt-2"
       >
         ← 처음으로 돌아가기
