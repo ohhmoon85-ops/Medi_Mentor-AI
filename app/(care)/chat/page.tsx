@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import type { UserInfo } from '@/components/care/user-info-form'
 import { AcuityBadge } from '@/components/ui/acuity-badge'
 import { RedFlagWarningCard } from '@/components/ui/red-flag-warning-card'
 import type { AcuityLevel } from '@/lib/triage/mts-engine'
@@ -50,6 +51,7 @@ export default function ChatPage() {
     isMinor: false,
     age: null,
   })
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const symptomExample = useMemo(() => getRandomSymptomExample(), [])
@@ -60,7 +62,7 @@ export default function ChatPage() {
     if (stored === 'true') setSeniorMode(true)
   }, [])
 
-  // G3-8 user_info: 없으면 /care/info로 redirect, 있으면 capturedDemographics 초기화
+  // G3-8 user_info: 없으면 /care/info로 redirect, 있으면 state + capturedDemographics 초기화
   const router = useRouter()
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -70,17 +72,23 @@ export default function ChatPage() {
       return
     }
     try {
-      const info = JSON.parse(raw) as {
-        sex?: string | null
-        age?: number | null
-        pregnancy?: boolean
-      }
+      const info = JSON.parse(raw) as UserInfo
+      setUserInfo(info)
       const age = typeof info.age === 'number' ? info.age : null
       setCapturedDemographics((prev) => ({
         pregnancy: prev.pregnancy || Boolean(info.pregnancy),
         isMinor:   prev.isMinor   || (age !== null && age < 18),
         age:       age ?? prev.age,
       }))
+
+      // G3-8 후속: user_info 있으면 봇 첫 메시지를 짧게 (인구학 재질문 회피)
+      const hasUsefulInfo = info.sex !== null || age !== null || info.pregnancy || (info.conditions?.length ?? 0) > 0
+      if (hasUsefulInfo) {
+        setMessages([{
+          role: 'assistant',
+          content: '안녕하세요! 어디가 불편하신가요? 😊',
+        }])
+      }
     } catch {
       // JSON 파싱 실패 시 무시 (자유 입력만 사용)
     }
@@ -165,6 +173,7 @@ export default function ChatPage() {
         body: JSON.stringify({
           message: userMessage,
           history: messages,
+          userInfo,
         }),
       })
 

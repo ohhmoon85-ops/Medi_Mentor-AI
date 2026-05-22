@@ -63,9 +63,43 @@ export interface RedFlagWarning {
   recommended_action: 'CALL_119' | 'GO_ER' | 'NIGHT_CLINIC' | 'CONSULT'
 }
 
+// G3-8 후속: localStorage user_info → LLM system prompt 보강 블록
+interface UserInfoPayload {
+  sex?: 'female' | 'male' | 'prefer_not_to_say' | null
+  age?: number | null
+  pregnancy?: boolean
+  conditions?: string[]
+  custom?: string
+}
+
+function buildUserInfoBlock(info: UserInfoPayload | null | undefined): string {
+  if (!info) return ''
+  const hasUseful = info.sex || typeof info.age === 'number' || info.pregnancy
+    || (info.conditions && info.conditions.length > 0) || (info.custom && info.custom.trim() !== '')
+  if (!hasUseful) return ''
+
+  const sexLabel = info.sex === 'female' ? '여성'
+    : info.sex === 'male' ? '남성'
+    : info.sex === 'prefer_not_to_say' ? '응답하지 않음' : '미입력'
+  const ageLabel = typeof info.age === 'number' ? `${info.age}세` : '미입력'
+  const conditionsLabel = (info.conditions && info.conditions.length > 0)
+    ? info.conditions.join(', ') : '없음'
+  const pregLabel = info.pregnancy ? '예' : '아니오'
+  const customLabel = info.custom && info.custom.trim() !== '' ? info.custom.trim() : '없음'
+
+  return [
+    '[사용자 정보 — 이미 수집됨, 다시 묻지 마세요]',
+    `- 성별: ${sexLabel}`,
+    `- 만 나이: ${ageLabel}`,
+    `- 지병: ${conditionsLabel}`,
+    `- 임신 여부: ${pregLabel}`,
+    `- 기타: ${customLabel}`,
+  ].join('\n')
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { message, history } = await req.json()
+    const { message, history, userInfo } = await req.json()
 
     // ─── [1단계] classifyRedFlags: 즉시 응급 키워드 필터 ─────────────
     const rfResult = classifyRedFlags(message)
@@ -105,10 +139,14 @@ export async function POST(req: NextRequest) {
       { role: 'user', content: message },
     ]
 
+    // G3-8 후속: localStorage user_info가 있으면 system prompt에 보강 (LLM 재질문 회피)
+    const userInfoBlock = buildUserInfoBlock(userInfo)
+    const systemWithInfo = userInfoBlock ? `${SYSTEM_PROMPT}\n\n${userInfoBlock}` : SYSTEM_PROMPT
+
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 512,
-      system: SYSTEM_PROMPT,
+      system: systemWithInfo,
       messages: apiMessages,
     })
 
