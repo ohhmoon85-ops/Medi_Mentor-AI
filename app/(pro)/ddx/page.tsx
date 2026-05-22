@@ -79,7 +79,7 @@ export default function DDxPage() {
               value={form.chief_complaint}
               onChange={(e) => setForm((f) => ({ ...f, chief_complaint: e.target.value }))}
               placeholder={`예: ${caseExample.chief_complaint}`}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
           <div>
@@ -88,7 +88,7 @@ export default function DDxPage() {
               value={form.age}
               onChange={(e) => setForm((f) => ({ ...f, age: e.target.value }))}
               placeholder="45"
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
           <div>
@@ -96,7 +96,7 @@ export default function DDxPage() {
             <select
               value={form.sex}
               onChange={(e) => setForm((f) => ({ ...f, sex: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <option value="">선택</option>
               <option value="M">남성</option>
@@ -112,7 +112,7 @@ export default function DDxPage() {
             onChange={(e) => setForm((f) => ({ ...f, hpi: e.target.value }))}
             placeholder={caseExample.hpi}
             rows={2}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
         </div>
 
@@ -124,7 +124,7 @@ export default function DDxPage() {
               onChange={(e) => setForm((f) => ({ ...f, exam: e.target.value }))}
               placeholder={caseExample.physical_exam}
               rows={2}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
           <div>
@@ -134,7 +134,7 @@ export default function DDxPage() {
               onChange={(e) => setForm((f) => ({ ...f, labs: e.target.value }))}
               placeholder={caseExample.lab_results}
               rows={2}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
         </div>

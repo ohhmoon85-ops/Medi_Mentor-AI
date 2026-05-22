@@ -74,7 +74,7 @@ export default function VerifyPage() {
                 setError('')
               }}
               placeholder="예: 123456"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
 
@@ -83,7 +83,7 @@ export default function VerifyPage() {
             <select
               value={specialtyCode}
               onChange={(e) => setSpecialtyCode(e.target.value as SpecialtyCode | '')}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <option value="">선택 (선택사항)</option>
               {SPECIALTY_OPTIONS.map((opt) => (

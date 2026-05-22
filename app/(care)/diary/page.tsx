@@ -59,7 +59,7 @@ export default function DiaryPage() {
               value={form.symptom}
               onChange={(e) => setForm((f) => ({ ...f, symptom: e.target.value }))}
               placeholder={`예: ${symptomExample.text}`}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
           <div>
@@ -82,7 +82,7 @@ export default function DiaryPage() {
               onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
               placeholder="추가 메모..."
               rows={2}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
           <div className="flex gap-2">

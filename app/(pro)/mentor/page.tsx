@@ -141,7 +141,7 @@ export default function MentorPage() {
             }}
             placeholder="임상 질문을 입력하세요... (예: 급성 담낭염 1차 항생제 선택 기준)"
             rows={2}
-            className="flex-1 resize-none border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="flex-1 resize-none border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
           <button
             onClick={sendQuestion}
