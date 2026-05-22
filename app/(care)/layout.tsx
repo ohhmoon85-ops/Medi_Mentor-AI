@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { Disclaimer } from '@/components/ui/disclaimer'
+import { DisclaimerModal } from '@/components/care/disclaimer-modal'
+import { SafetyFooter } from '@/components/care/safety-footer'
 
 export const metadata: Metadata = {
   title: 'MediMentor Care - 1차 의료 안내',
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
 export default function CareLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* 최초 진입 안내 모달 (G3-2 LAUNCH-0 직진 안전망) */}
+      <DisclaimerModal />
+
       {/* 헤더 */}
       <header className="bg-[#003876] text-white px-4 py-3 shadow-md">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -33,8 +37,8 @@ export default function CareLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
 
-      {/* 하단 면책 고지 (고정) */}
-      <Disclaimer />
+      {/* 영구 안전 안내 푸터 (G3-2 SafetyFooter — 동의 철회·재확인 포함) */}
+      <SafetyFooter />
     </div>
   )
 }
