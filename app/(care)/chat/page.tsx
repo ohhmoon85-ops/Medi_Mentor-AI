@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { AcuityBadge } from '@/components/ui/acuity-badge'
 import { RedFlagWarningCard } from '@/components/ui/red-flag-warning-card'
 import type { AcuityLevel } from '@/lib/triage/mts-engine'
@@ -58,6 +59,32 @@ export default function ChatPage() {
     const stored = localStorage.getItem('senior_mode')
     if (stored === 'true') setSeniorMode(true)
   }, [])
+
+  // G3-8 user_info: 없으면 /care/info로 redirect, 있으면 capturedDemographics 초기화
+  const router = useRouter()
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const raw = window.localStorage.getItem('medimentor_care_user_info_v1')
+    if (!raw) {
+      router.replace('/care/info')
+      return
+    }
+    try {
+      const info = JSON.parse(raw) as {
+        sex?: string | null
+        age?: number | null
+        pregnancy?: boolean
+      }
+      const age = typeof info.age === 'number' ? info.age : null
+      setCapturedDemographics((prev) => ({
+        pregnancy: prev.pregnancy || Boolean(info.pregnancy),
+        isMinor:   prev.isMinor   || (age !== null && age < 18),
+        age:       age ?? prev.age,
+      }))
+    } catch {
+      // JSON 파싱 실패 시 무시 (자유 입력만 사용)
+    }
+  }, [router])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })

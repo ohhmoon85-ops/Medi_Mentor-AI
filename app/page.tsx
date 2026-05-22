@@ -22,7 +22,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {/* Care 카드 */}
           <Link
-            href="/chat"
+            href="/care/info"
             className="group relative bg-white rounded-3xl p-6 sm:p-7 text-left ring-1 ring-white/10 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
           >
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 mb-5">

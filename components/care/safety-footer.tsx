@@ -10,6 +10,7 @@
  */
 
 import { DISCLAIMER_STORAGE_KEY } from './disclaimer-modal'
+import { USER_INFO_STORAGE_KEY } from './user-info-form'
 
 export function SafetyFooter() {
   function resetDisclaimer() {
@@ -18,8 +19,14 @@ export function SafetyFooter() {
     window.location.reload()
   }
 
+  function resetUserInfo() {
+    if (typeof window === 'undefined') return
+    window.localStorage.removeItem(USER_INFO_STORAGE_KEY)
+    window.location.href = '/care/info'
+  }
+
   return (
-    <footer className="border-t border-gray-200 bg-gray-50 text-xs sm:text-sm text-gray-600 px-4 py-3 text-center leading-relaxed">
+    <footer className="border-t border-gray-200 bg-gray-50 text-xs sm:text-sm text-gray-600 px-4 py-3 text-center leading-relaxed space-x-2">
       <span>본 서비스는 의학적 진단이 아닌 건강 정보 안내 서비스입니다. </span>
       <span>응급 상황 시 즉시 119에 신고하세요. </span>
       <button
@@ -29,6 +36,14 @@ export function SafetyFooter() {
         aria-label="안전 안내 동의 철회 또는 재확인"
       >
         [동의 철회·재확인]
+      </button>
+      <button
+        type="button"
+        onClick={resetUserInfo}
+        className="text-teal-700 hover:text-teal-800 underline underline-offset-2 font-medium"
+        aria-label="내 정보 수정 또는 삭제"
+      >
+        [내 정보 수정·삭제]
       </button>
     </footer>
   )
