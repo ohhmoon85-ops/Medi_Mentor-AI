@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { UserInfo } from '@/components/care/user-info-form'
+import { AnswerSourceFooter } from '@/components/care/answer-source-footer'
 import { AcuityBadge } from '@/components/ui/acuity-badge'
 import { RedFlagWarningCard } from '@/components/ui/red-flag-warning-card'
 import type { AcuityLevel } from '@/lib/triage/mts-engine'
@@ -17,6 +18,8 @@ const RED_FLAG_MIN_INPUT_LENGTH = 5
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  /** G4-1: 결론 메시지 (응급도 분류 완료) 일 때만 설정. KTAS Level 1~5 (= medimentor L1~L5) */
+  ktasLevel?: 1 | 2 | 3 | 4 | 5
 }
 
 interface CapturedDemographics {
@@ -179,9 +182,16 @@ export default function ChatPage() {
 
       const data = await res.json()
 
+      // G4-1: triage 결론 시점 메시지에 KTAS Level 첨부 → AnswerSourceFooter 마운트 트리거
+      const acuity = data.triage?.acuity_level
+      const ktasLevel: 1 | 2 | 3 | 4 | 5 | undefined =
+        acuity === 1 || acuity === 2 || acuity === 3 || acuity === 4 || acuity === 5
+          ? acuity
+          : undefined
+
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: data.reply },
+        { role: 'assistant', content: data.reply, ktasLevel },
       ])
 
       if (data.triage) {
@@ -276,14 +286,19 @@ export default function ChatPage() {
                 🏥
               </div>
             )}
-            <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 text-base leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-[#003876] text-white rounded-br-sm'
-                  : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm'
-              }`}
-            >
-              {msg.content}
+            <div className="flex flex-col max-w-[80%] gap-2">
+              <div
+                className={`rounded-2xl px-4 py-3 text-base leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'bg-[#003876] text-white rounded-br-sm'
+                    : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm'
+                }`}
+              >
+                {msg.content}
+              </div>
+              {msg.role === 'assistant' && msg.ktasLevel && (
+                <AnswerSourceFooter ktasLevel={msg.ktasLevel} />
+              )}
             </div>
           </div>
         ))}
