@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { DevModeBanner } from '@/components/pro/dev-mode-banner'
 
 export const metadata: Metadata = {
   title: 'MediMentor Pro - 의사용',
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
 export default function ProLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50">
+      <DevModeBanner />
       {/* 헤더 */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between">

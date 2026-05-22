@@ -8,8 +8,10 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
+    // 개발 모드 우회 — 환경변수로 게이트 비활성화 (출시 시점 unset/false 시 정상 게이트 복귀)
+    if (process.env.NEXT_PUBLIC_PRO_DEV_MODE === 'true') return
     if (typeof window !== 'undefined' && !sessionStorage.getItem('pro_verified')) {
-      router.replace('/pro/verify')
+      router.replace('/verify')
     }
   }, [router])
 

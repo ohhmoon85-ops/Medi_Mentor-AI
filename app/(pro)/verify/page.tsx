@@ -34,7 +34,7 @@ export default function VerifyPage() {
       sessionStorage.setItem('pro_verified', 'true')
       sessionStorage.setItem('pro_license', licenseNumber)
       sessionStorage.setItem('pro_specialty_code', specialtyCode)
-      router.push('/pro/dashboard')
+      router.push('/dashboard')
     } else {
       setError('면허번호 형식을 확인해 주세요. (예: 123456)')
       setStep('license')

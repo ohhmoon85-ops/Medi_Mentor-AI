@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Stethoscope, MessageCircle, ChevronRight } from 'lucide-react'
 
 export default function HomePage() {
+  const isProDevMode = process.env.NEXT_PUBLIC_PRO_DEV_MODE === 'true'
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-teal-900 flex items-center justify-center px-4 py-12 sm:py-16">
       <div className="max-w-3xl w-full text-center space-y-10 sm:space-y-12">
@@ -44,7 +46,7 @@ export default function HomePage() {
 
           {/* Pro 카드 */}
           <Link
-            href="/verify"
+            href={isProDevMode ? '/dashboard' : '/verify'}
             className="group relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 sm:p-7 text-left ring-1 ring-gray-700/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 hover:ring-amber-500/30 transition-all duration-300"
           >
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/20 mb-5">
@@ -59,7 +61,7 @@ export default function HomePage() {
               DDx · Red Flag · 처방 자문 · 멘토
             </p>
             <div className="mt-5 inline-flex items-center gap-1 text-amber-400 font-semibold text-sm group-hover:gap-2 transition-all">
-              의사 인증 후 입장
+              {isProDevMode ? '[개발 모드] 입장' : '의사 인증 후 입장'}
               <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
             </div>
           </Link>
