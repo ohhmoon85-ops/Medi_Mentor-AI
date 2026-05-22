@@ -18,7 +18,7 @@ export default function HomePage() {
         {/* 두 가지 입구 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Link
-            href="/care/alpha-consent"
+            href="/chat"
             className="bg-white rounded-3xl p-7 text-left hover:shadow-2xl transition-all hover:-translate-y-1 group"
           >
             <div className="text-4xl mb-3">💬</div>
