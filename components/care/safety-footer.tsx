@@ -29,6 +29,7 @@ export function SafetyFooter() {
     <footer className="border-t border-gray-200 bg-gray-50 text-xs sm:text-sm text-gray-600 px-4 py-3 text-center leading-relaxed space-x-2">
       <span>본 서비스는 의학적 진단이 아닌 건강 정보 안내 서비스입니다. </span>
       <span className="text-amber-700">건강기능식품 정보는 효능 보증이 아닌 일반 참고용입니다. </span>
+      <span className="text-blue-700">📷 사진 분석은 추정 정보이며 사진은 서버에 저장되지 않습니다. </span>
       <span>응급 상황 시 즉시 119에 신고하세요. </span>
       <button
         type="button"

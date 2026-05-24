@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import type { UserInfo } from '@/components/care/user-info-form'
 import { AnswerSourceFooter } from '@/components/care/answer-source-footer'
 import { SupplementInfoCard } from '@/components/care/supplement-info-card'
+import { ImageInput } from '@/components/care/image-input'
+import { VisionAnalysisCard } from '@/components/care/vision-analysis-card'
+import type { VisionAnalysisResult } from '@/lib/vision'
 import { AcuityBadge } from '@/components/ui/acuity-badge'
 import { RedFlagWarningCard } from '@/components/ui/red-flag-warning-card'
 import type { AcuityLevel } from '@/lib/triage/mts-engine'
@@ -23,6 +26,8 @@ interface Message {
   ktasLevel?: 1 | 2 | 3 | 4 | 5
   /** G5-4: LLM이 결론 turn에 매칭한 증상 키 (lib/supplements/data.ts). 카드 마운트 트리거 */
   symptomKey?: string
+  /** D1-6: Vision 분석 결과. 결론 turn + 사진 첨부 turn에만 채워짐 */
+  visionAnalysis?: VisionAnalysisResult
 }
 
 interface CapturedDemographics {
@@ -47,6 +52,7 @@ export default function ChatPage() {
     },
   ])
   const [input, setInput] = useState('')
+  const [images, setImages] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [triage, setTriage] = useState<TriageData | null>(null)
   const [redFlagWarning, setRedFlagWarning] = useState<RedFlagWarning | null>(null)
@@ -168,9 +174,28 @@ export default function ChatPage() {
     if (!input.trim() || loading) return
 
     const userMessage = input.trim()
+    const attachedImages = images.slice(0, 3)
     setInput('')
+    setImages([])  // D1-6: 전송 직후 메모리 정리 (서버 미저장 정책 정합)
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
     setLoading(true)
+
+    // D1-6: vision 분석 (사진 첨부 시) — 실패 시 triage 단독으로 fallback
+    let visionAnalysis: VisionAnalysisResult | undefined
+    if (attachedImages.length > 0) {
+      try {
+        const vres = await fetch('/api/vision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ images: attachedImages, symptomText: userMessage }),
+        })
+        if (vres.ok) {
+          visionAnalysis = (await vres.json()) as VisionAnalysisResult
+        }
+      } catch {
+        // vision 실패 시 triage 단독 진행 (graceful fallback)
+      }
+    }
 
     try {
       const res = await fetch('/api/triage', {
@@ -198,9 +223,21 @@ export default function ChatPage() {
           ? data.symptomKey
           : undefined
 
+      // D1-6: vision 보정 우선 — ktasAdjustment.level이 있고 더 응급이면 우선 채택
+      let effectiveKtasLevel = ktasLevel
+      if (visionAnalysis?.ktasAdjustment?.level && (!effectiveKtasLevel || visionAnalysis.ktasAdjustment.level < effectiveKtasLevel)) {
+        effectiveKtasLevel = visionAnalysis.ktasAdjustment.level
+      }
+
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: data.reply, ktasLevel, symptomKey },
+        {
+          role: 'assistant',
+          content: data.reply,
+          ktasLevel: effectiveKtasLevel,
+          symptomKey,
+          visionAnalysis: effectiveKtasLevel ? visionAnalysis : undefined,
+        },
       ])
 
       if (data.triage) {
@@ -306,10 +343,17 @@ export default function ChatPage() {
                 {msg.content}
               </div>
               {msg.role === 'assistant' && msg.ktasLevel && (
-                <AnswerSourceFooter ktasLevel={msg.ktasLevel} supplementSource={Boolean(msg.symptomKey)} />
+                <AnswerSourceFooter
+                  ktasLevel={msg.ktasLevel}
+                  supplementSource={Boolean(msg.symptomKey)}
+                  visionSource={Boolean(msg.visionAnalysis)}
+                />
               )}
               {msg.role === 'assistant' && msg.ktasLevel && (
                 <SupplementInfoCard symptomKey={msg.symptomKey} conclusionText={msg.content} />
+              )}
+              {msg.role === 'assistant' && msg.ktasLevel && msg.visionAnalysis && (
+                <VisionAnalysisCard result={msg.visionAnalysis} />
               )}
             </div>
           </div>
@@ -363,7 +407,9 @@ export default function ChatPage() {
       </div>
 
       {/* 입력 영역 */}
-      <div className="border-t border-gray-200 pt-3 bg-white">
+      <div className="border-t border-gray-200 pt-3 bg-white space-y-2">
+        {/* D1-3 사진 첨부 (선택, 최대 3장) */}
+        <ImageInput images={images} onChange={setImages} disabled={loading} />
         <div className="flex gap-2 items-end">
           <button
             onClick={startVoiceInput}

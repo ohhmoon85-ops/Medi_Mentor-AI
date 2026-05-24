@@ -19,6 +19,8 @@ export interface AnswerSourceFooterProps {
   additionalSources?: { name: string; reference: string; url?: string }[]
   /** G5-5: true 시 건강기능식품 출처 한 줄 추가 (식약처 인증 기능성 원료 일반 정보) */
   supplementSource?: boolean
+  /** D1-5: true 시 Vision 분석 출처 한 줄 추가 (Anthropic Claude Vision — 추정 정보) */
+  visionSource?: boolean
 }
 
 function SourceLink({ href, label = '[원문 보기]' }: { href: string; label?: string }) {
@@ -34,7 +36,7 @@ function SourceLink({ href, label = '[원문 보기]' }: { href: string; label?:
   )
 }
 
-export function AnswerSourceFooter({ ktasLevel, additionalSources, supplementSource }: AnswerSourceFooterProps) {
+export function AnswerSourceFooter({ ktasLevel, additionalSources, supplementSource, visionSource }: AnswerSourceFooterProps) {
   return (
     <div className="mt-3 border-t border-gray-200 pt-3 text-xs sm:text-[13px] leading-relaxed text-gray-600 bg-gray-50 rounded-b-2xl px-3 sm:px-4 py-3 space-y-2">
       <p className="font-semibold text-gray-700 flex items-center gap-1">
@@ -63,6 +65,11 @@ export function AnswerSourceFooter({ ktasLevel, additionalSources, supplementSou
         {supplementSource && (
           <li>
             건강기능식품: <span className="text-gray-500">식약처 인증 기능성 원료 기반 일반 정보</span>
+          </li>
+        )}
+        {visionSource && (
+          <li>
+            사진 분석: <span className="text-gray-500">Anthropic Claude Vision 추정 (서버 미저장)</span>
           </li>
         )}
       </ul>
