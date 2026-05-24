@@ -5,8 +5,8 @@
  *
  * - 최초 방문 시 1회 표시
  * - localStorage 키: medimentor_care_disclaimer_acked_v1 (버전 키)
- * - 안내 6건 (체크박스 X, 단일 확인 버튼)
- * - 의학적 진단 부정 / 응급 119 / 의료기관 방문 권유 / 책임 분기 / 건강기능식품 비보증 (G5-5) / 사진 분석 추정 (D1-5)
+ * - 안내 7건 (체크박스 X, 단일 확인 버튼)
+ * - 의학적 진단 부정 / 응급 119 / 의료기관 방문 권유 / 책임 분기 / 건강기능식품 비보증 (G5-5) / 사진 분석 추정 (D1-5) / 체크리스트 추정 (D2-7)
  * - "확인하고 시작하기" 클릭 시 localStorage 저장 + 모달 닫힘
  * - 모달 표시 중 body 스크롤 차단 + ESC 키로 닫기 가능
  * - 디자인: 흰 배경 + teal 강조 + 기본 그림자 (ui-tokens v2는 2단계 G3-3에서 정착)
@@ -87,6 +87,10 @@ export function DisclaimerModal() {
           <li className="flex gap-2">
             <span className="text-blue-700 font-bold flex-shrink-0">·</span>
             <span>사진 분석 결과는 추정이며 의학적 진단이 아닙니다. 자세한 진단은 의료기관 방문이 필요합니다. 업로드한 사진은 서버에 저장되지 않으며 분석 직후 제거됩니다.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-emerald-700 font-bold flex-shrink-0">·</span>
+            <span>체크리스트 결과는 추정 안내이며 의료 상담을 대체할 수 없습니다. 응급 신호가 표시되면 119 또는 응급실을 즉시 이용하세요.</span>
           </li>
         </ul>
 

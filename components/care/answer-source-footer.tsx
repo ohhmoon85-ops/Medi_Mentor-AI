@@ -21,6 +21,8 @@ export interface AnswerSourceFooterProps {
   supplementSource?: boolean
   /** D1-5: true 시 Vision 분석 출처 한 줄 추가 (Anthropic Claude Vision — 추정 정보) */
   visionSource?: boolean
+  /** D2-7: true 시 체크리스트 출처 한 줄 추가 (Decision Engine 기반 추정) */
+  checklistSource?: boolean
 }
 
 function SourceLink({ href, label = '[원문 보기]' }: { href: string; label?: string }) {
@@ -36,7 +38,7 @@ function SourceLink({ href, label = '[원문 보기]' }: { href: string; label?:
   )
 }
 
-export function AnswerSourceFooter({ ktasLevel, additionalSources, supplementSource, visionSource }: AnswerSourceFooterProps) {
+export function AnswerSourceFooter({ ktasLevel, additionalSources, supplementSource, visionSource, checklistSource }: AnswerSourceFooterProps) {
   return (
     <div className="mt-3 border-t border-gray-200 pt-3 text-xs sm:text-[13px] leading-relaxed text-gray-600 bg-gray-50 rounded-b-2xl px-3 sm:px-4 py-3 space-y-2">
       <p className="font-semibold text-gray-700 flex items-center gap-1">
@@ -70,6 +72,11 @@ export function AnswerSourceFooter({ ktasLevel, additionalSources, supplementSou
         {visionSource && (
           <li>
             사진 분석: <span className="text-gray-500">Anthropic Claude Vision 추정 (서버 미저장)</span>
+          </li>
+        )}
+        {checklistSource && (
+          <li>
+            체크리스트: <span className="text-gray-500">Decision Engine 룰셋 추정 (의료 상담 대체 불가)</span>
           </li>
         )}
       </ul>
