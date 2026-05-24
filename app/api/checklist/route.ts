@@ -70,7 +70,15 @@ export async function POST(req: NextRequest) {
         if (txt) {
           // D2 closure: 단언 어휘 사후 검증 (lib/vision/safety-rules 재사용) — 위반 시 soften
           const v = validateOutput(txt)
-          llmReply = v.valid ? txt : softenOutput(txt)
+          let cleaned = v.valid ? txt : softenOutput(txt)
+          // UX 피드백: LLM이 prompt 무시하고 면책 라인을 첨부하는 경우 strip (UI 중복 회피)
+          cleaned = cleaned
+            .replace(/본\s*안내는\s*추정이며[^.]*\.?/g, '')
+            .replace(/(?:정확|자세)한\s*진단은\s*의료기관\s*방문이?\s*필요합니다\.?/g, '')
+            .replace(/체크리스트\s*결과는\s*의료\s*상담을\s*대체[^.]*\.?/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+          llmReply = cleaned
         }
       } catch {
         // LLM 실패는 무시 (matchResult만으로도 UI 표시 가능)
