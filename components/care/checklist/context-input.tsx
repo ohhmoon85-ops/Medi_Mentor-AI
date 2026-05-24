@@ -1,7 +1,11 @@
 'use client'
 
 /**
- * D2-5 3단계 — 시간·강도·보호자·자유입력 컨텍스트 입력
+ * D2-5 3단계 — 시간·강도·자유입력 컨텍스트 입력
+ *
+ * UX 피드백 #2 (2026-05-24):
+ * - 보호자(companion) 토글 제거 — user-info-form에서 이미 수집함 (중복 해소)
+ * - value.companion 은 /care/check 페이지가 user_info 로부터 자동 채움
  */
 
 import type { ChecklistContext } from '@/lib/checklist'
@@ -21,13 +25,6 @@ const INTENSITY_OPTIONS: Array<{ id: ChecklistContext['intensity']; label: strin
   { id: 'extreme',    label: '극심' },
 ]
 
-const COMPANION_OPTIONS: Array<{ id: ChecklistContext['companion']; label: string; emoji: string }> = [
-  { id: 'self',   label: '본인',     emoji: '🙋' },
-  { id: 'family', label: '가족',     emoji: '👨‍👩‍👧' },
-  { id: 'child',  label: '어린이',   emoji: '🧒' },
-  { id: 'elder',  label: '노인',     emoji: '👴' },
-]
-
 export interface ContextInputProps {
   value: ChecklistContext
   onChange: (next: ChecklistContext) => void
@@ -36,31 +33,6 @@ export interface ContextInputProps {
 export function ContextInput({ value, onChange }: ContextInputProps) {
   return (
     <div className="space-y-4">
-      {/* 보호자 토글 */}
-      <div>
-        <label className="text-sm font-semibold text-gray-700 block mb-2">누구의 증상인가요?</label>
-        <div className="grid grid-cols-4 gap-2">
-          {COMPANION_OPTIONS.map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => onChange({ ...value, companion: opt.id })}
-              aria-pressed={value.companion === opt.id}
-              className={`flex flex-col items-center gap-1 rounded-xl border-2 py-2 transition-colors ${
-                value.companion === opt.id
-                  ? 'bg-emerald-50 border-emerald-500'
-                  : 'bg-white border-gray-200 hover:border-emerald-300'
-              }`}
-            >
-              <span className="text-xl">{opt.emoji}</span>
-              <span className={`text-xs ${value.companion === opt.id ? 'text-emerald-800 font-semibold' : 'text-gray-700'}`}>
-                {opt.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* 시간 */}
       <div>
         <label className="text-sm font-semibold text-gray-700 block mb-2">언제부터?</label>

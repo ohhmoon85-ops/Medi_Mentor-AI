@@ -1,9 +1,13 @@
 'use client'
 
 /**
- * G3-8 사용자 정보 수집 폼 (chat 진입 전 1회)
+ * G3-8 대상자 정보 수집 폼 (chat·체크리스트 진입 전 1회)
  *
- * - 성별 / 나이 / 임신 / 지병 / 기타 자유 입력
+ * UX 피드백 #1·#2 (2026-05-24):
+ * - "내 정보" → "대상자 정보" (보호자 케이스 포함)
+ * - companion 토글을 본 폼에 통합 (context-input 중복 제거)
+ *
+ * - companion / 성별 / 나이 / 임신 / 지병 / 기타 자유 입력
  * - localStorage 키: medimentor_care_user_info_v1
  * - 저장 후 /care/check 이동 (D2 체크리스트 메인 흐름)
  * - 건너뛰기 시 빈 객체 저장 + /care/check 이동
@@ -17,8 +21,11 @@ import { useRouter } from 'next/navigation'
 export const USER_INFO_STORAGE_KEY = 'medimentor_care_user_info_v1'
 
 export type UserInfoSex = 'female' | 'male' | 'prefer_not_to_say'
+export type UserInfoCompanion = 'self' | 'family' | 'child' | 'elder'
 
 export interface UserInfo {
+  /** UX 피드백 #2: 대상자 (본인/가족/어린이/노인). 기존 사용자 호환을 위해 optional */
+  companion?: UserInfoCompanion
   sex: UserInfoSex | null
   age: number | null
   pregnancy: boolean
@@ -27,6 +34,7 @@ export interface UserInfo {
 }
 
 export const EMPTY_USER_INFO: UserInfo = {
+  companion: 'self',
   sex: null,
   age: null,
   pregnancy: false,
@@ -36,8 +44,16 @@ export const EMPTY_USER_INFO: UserInfo = {
 
 const CONDITION_OPTIONS = ['당뇨', '고혈압', '심장질환', '천식', '없음'] as const
 
+const COMPANION_OPTIONS: Array<{ v: UserInfoCompanion; label: string; emoji: string }> = [
+  { v: 'self',   label: '본인',   emoji: '🙋' },
+  { v: 'family', label: '가족',   emoji: '👨‍👩‍👧' },
+  { v: 'child',  label: '어린이', emoji: '🧒' },
+  { v: 'elder',  label: '노인',   emoji: '👴' },
+]
+
 export function UserInfoForm() {
   const router = useRouter()
+  const [companion, setCompanion] = useState<UserInfoCompanion>('self')
   const [sex, setSex] = useState<UserInfoSex | null>(null)
   const [ageInput, setAgeInput] = useState('')
   const [pregnancy, setPregnancy] = useState(false)
@@ -57,6 +73,7 @@ export function UserInfoForm() {
   function save() {
     const ageNum = ageInput.trim() === '' ? null : Number(ageInput)
     const info: UserInfo = {
+      companion,
       sex,
       age: Number.isFinite(ageNum) ? ageNum : null,
       pregnancy: sex === 'female' && pregnancy,
@@ -79,11 +96,39 @@ export function UserInfoForm() {
   return (
     <div className="w-full max-w-lg bg-white rounded-2xl shadow-md p-6 sm:p-8 space-y-6">
       <header className="space-y-2 text-center">
-        <h1 className="text-xl sm:text-2xl font-bold text-teal-700">내 정보 입력</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-teal-700">대상자 정보 입력</h1>
         <p className="text-sm text-gray-600">
-          더 정확한 안내를 위해 기본 정보를 입력해 주세요. 입력하지 않으셔도 서비스 이용은 가능합니다.
+          더 정확한 안내를 위해 대상자의 기본 정보를 입력해 주세요. 입력하지 않으셔도 서비스 이용은 가능합니다.
         </p>
       </header>
+
+      {/* 대상자 (companion) — UX 피드백 #2 정합으로 본 폼에 통합 */}
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-semibold text-gray-800">누구의 정보입니까?</legend>
+        <div className="grid grid-cols-4 gap-2">
+          {COMPANION_OPTIONS.map((opt) => (
+            <label
+              key={opt.v}
+              className={`flex flex-col items-center gap-1 cursor-pointer rounded-xl border-2 py-2 text-sm font-medium transition-colors ${
+                companion === opt.v
+                  ? 'border-teal-600 bg-teal-50 text-teal-800'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <input
+                type="radio"
+                name="companion"
+                value={opt.v}
+                checked={companion === opt.v}
+                onChange={() => setCompanion(opt.v)}
+                className="sr-only"
+              />
+              <span className="text-xl" aria-hidden="true">{opt.emoji}</span>
+              <span className="text-xs">{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       {/* 성별 */}
       <fieldset className="space-y-2">

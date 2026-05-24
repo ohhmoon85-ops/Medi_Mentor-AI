@@ -2,7 +2,10 @@
 
 /**
  * D2-6 체크리스트 페이지 — /care/check
- * 4단계 흐름: 대분류 → 증상 체크 → 시간·강도·보호자 → 결과
+ * 4단계 흐름: 대분류 → 증상 체크 → 시간·강도 → 결과
+ *
+ * UX 피드백 #2 (2026-05-24):
+ * - 보호자(companion)는 user-info-form에서 수집 → 본 페이지에서 자동 채움
  */
 
 import { useState, useEffect } from 'react'
@@ -11,7 +14,7 @@ import { RegionGrid } from '@/components/care/checklist/region-grid'
 import { SymptomCheckboxes } from '@/components/care/checklist/symptom-checkboxes'
 import { ContextInput } from '@/components/care/checklist/context-input'
 import { ResultCard } from '@/components/care/checklist/result-card'
-import { USER_INFO_STORAGE_KEY } from '@/components/care/user-info-form'
+import { USER_INFO_STORAGE_KEY, type UserInfo } from '@/components/care/user-info-form'
 import type { RegionId, ChecklistContext, ChecklistMatchResult } from '@/lib/checklist'
 
 type Step = 'region' | 'symptoms' | 'context' | 'result'
@@ -23,14 +26,8 @@ const DEFAULT_CONTEXT: ChecklistContext = {
 }
 
 export default function CheckPage() {
-  // UX 피드백 #2: user_info 미입력 시 /care/info 로 우선 진입
+  // UX 피드백 #2: user_info 미입력 시 /care/info 로 우선 진입 + companion 자동 설정
   const router = useRouter()
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const raw = window.localStorage.getItem(USER_INFO_STORAGE_KEY)
-    if (!raw) router.replace('/care/info')
-  }, [router])
-
   const [step, setStep] = useState<Step>('region')
   const [region, setRegion] = useState<RegionId | undefined>()
   const [checkedIds, setCheckedIds] = useState<string[]>([])
@@ -39,6 +36,23 @@ export default function CheckPage() {
   const [result, setResult] = useState<ChecklistMatchResult | null>(null)
   const [llmReply, setLlmReply] = useState<string | undefined>()
   const [error, setError] = useState<string>('')
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const raw = window.localStorage.getItem(USER_INFO_STORAGE_KEY)
+    if (!raw) {
+      router.replace('/care/info')
+      return
+    }
+    try {
+      const info = JSON.parse(raw) as UserInfo
+      if (info.companion) {
+        setContext((prev) => ({ ...prev, companion: info.companion! }))
+      }
+    } catch {
+      // JSON 파싱 실패 시 DEFAULT_CONTEXT.companion='self' 유지
+    }
+  }, [router])
 
   function reset() {
     setStep('region')
