@@ -18,6 +18,7 @@ import {
   type RegionId,
   type ChecklistMatchResult,
 } from '@/lib/checklist'
+import { validateOutput, softenOutput } from '@/lib/vision'
 
 interface ChecklistRequest {
   region: RegionId
@@ -66,7 +67,11 @@ export async function POST(req: NextRequest) {
           messages: [{ role: 'user', content: `Decision Engine 결과 (고정 입력):\n${summary}\n\n자연어 안내를 생성하세요.` }],
         })
         const txt = response.content[0]?.type === 'text' ? response.content[0].text : ''
-        if (txt) llmReply = txt
+        if (txt) {
+          // D2 closure: 단언 어휘 사후 검증 (lib/vision/safety-rules 재사용) — 위반 시 soften
+          const v = validateOutput(txt)
+          llmReply = v.valid ? txt : softenOutput(txt)
+        }
       } catch {
         // LLM 실패는 무시 (matchResult만으로도 UI 표시 가능)
       }
