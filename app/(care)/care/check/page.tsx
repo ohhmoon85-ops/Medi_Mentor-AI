@@ -5,11 +5,13 @@
  * 4단계 흐름: 대분류 → 증상 체크 → 시간·강도·보호자 → 결과
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { RegionGrid } from '@/components/care/checklist/region-grid'
 import { SymptomCheckboxes } from '@/components/care/checklist/symptom-checkboxes'
 import { ContextInput } from '@/components/care/checklist/context-input'
 import { ResultCard } from '@/components/care/checklist/result-card'
+import { USER_INFO_STORAGE_KEY } from '@/components/care/user-info-form'
 import type { RegionId, ChecklistContext, ChecklistMatchResult } from '@/lib/checklist'
 
 type Step = 'region' | 'symptoms' | 'context' | 'result'
@@ -21,6 +23,14 @@ const DEFAULT_CONTEXT: ChecklistContext = {
 }
 
 export default function CheckPage() {
+  // UX 피드백 #2: user_info 미입력 시 /care/info 로 우선 진입
+  const router = useRouter()
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const raw = window.localStorage.getItem(USER_INFO_STORAGE_KEY)
+    if (!raw) router.replace('/care/info')
+  }, [router])
+
   const [step, setStep] = useState<Step>('region')
   const [region, setRegion] = useState<RegionId | undefined>()
   const [checkedIds, setCheckedIds] = useState<string[]>([])

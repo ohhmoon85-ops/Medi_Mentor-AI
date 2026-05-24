@@ -9,6 +9,8 @@
  * - 매치 없음: 일반 안내 (FM)
  */
 
+import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import type { ChecklistMatchResult } from '@/lib/checklist'
 import { KOREAN_SPECIALTIES, type SpecialtyCode } from '@/lib/constants/specialties'
 import { SupplementInfoCard } from '@/components/care/supplement-info-card'
@@ -127,17 +129,33 @@ export function ResultCard({ result, llmReply }: ResultCardProps) {
         {/* rationale */}
         <p className="text-xs text-gray-500">{result.rationale}</p>
 
-        {/* 면책 */}
-        <p className="text-xs text-amber-800 bg-amber-50 rounded-lg p-2 border border-amber-200">
+        {/* 면책 — UX 피드백 #4: 글자 축소 + 위 여백 추가 */}
+        <p className="mt-4 text-[11px] sm:text-xs text-amber-800 bg-amber-50 rounded-lg p-2 border border-amber-200 leading-relaxed">
           ⚠️ 본 안내는 추정이며 의학적 진단이 아닙니다. 자세한 진단은 의료기관 방문이 필요합니다.
           체크리스트 결과는 의료 상담을 대체할 수 없습니다.
         </p>
       </div>
 
-      {/* 건강기능식품 카드 (G5-3 결합) */}
+      {/* 건강기능식품 카드 (G5-3 결합) — UX 피드백 #3: 명시적 섹션 표시 */}
       {result.supplementKey && (
         <SupplementInfoCard symptomKey={result.supplementKey} />
       )}
+
+      {/* UX 피드백 #1·#3: 더 자세한 상담이 필요할 때 채팅으로 — 통합 흐름 */}
+      <Link
+        href="/care/chat"
+        className="block bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-2xl p-4 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+            <MessageCircle className="h-5 w-5 text-blue-700" strokeWidth={2} />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-blue-900 text-sm">자세한 대화 상담 (선택)</p>
+            <p className="text-xs text-blue-700">사진 첨부 + 자세한 증상 설명이 필요할 때 →</p>
+          </div>
+        </div>
+      </Link>
     </div>
   )
 }

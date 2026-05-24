@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Stethoscope, MessageCircle, ChevronRight, CheckSquare } from 'lucide-react'
+import { Stethoscope, ChevronRight, CheckSquare } from 'lucide-react'
 
 export default function HomePage() {
   return (
@@ -18,51 +18,31 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* 두 입구 — 체크리스트(1순위) + 채팅(보조) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 max-w-2xl mx-auto">
-          {/* 체크리스트 — 1순위 (D2) */}
+        {/* 단일 진입점 — 체크리스트가 기본, 결과 화면에서 자세한 상담 옵션 제공 */}
+        <div className="max-w-md mx-auto">
           <Link
-            href="/care/check"
+            href="/care/info"
             className="group relative block bg-white rounded-3xl p-6 sm:p-7 text-left ring-2 ring-emerald-400/50 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
           >
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 mb-5">
               <CheckSquare className="h-6 w-6 text-emerald-700" strokeWidth={2} />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 tracking-tight">
-              빠른 증상 체크
+              증상 안내 시작
             </h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-              체크리스트로 30초 만에
+              내 정보 입력 → 부위·증상 체크 →
               <br />
               응급도·진료과·건강기능식품 안내
             </p>
             <div className="mt-5 inline-flex items-center gap-1 text-emerald-700 font-semibold text-sm group-hover:gap-2 transition-all">
-              체크 시작 (30초)
+              시작하기 (약 1분)
               <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
             </div>
           </Link>
-
-          {/* 채팅 — 보조 */}
-          <Link
-            href="/care/info"
-            className="group relative block bg-white/95 rounded-3xl p-6 sm:p-7 text-left ring-1 ring-white/10 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-          >
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 ring-1 ring-blue-100 mb-5">
-              <MessageCircle className="h-6 w-6 text-blue-700" strokeWidth={2} />
-            </div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 tracking-tight">
-              자세한 상담
-            </h2>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              대화형 안내 + 사진 분석
-              <br />
-              자세한 증상 설명이 필요할 때
-            </p>
-            <div className="mt-5 inline-flex items-center gap-1 text-blue-700 font-semibold text-sm group-hover:gap-2 transition-all">
-              대화 시작 (5분+)
-              <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
-            </div>
-          </Link>
+          <p className="mt-3 text-xs text-blue-200/70 text-center">
+            결과 화면에서 자세한 대화 상담 옵션을 제공합니다.
+          </p>
         </div>
 
         {/* 하단 면책 */}

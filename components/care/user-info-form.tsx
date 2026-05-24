@@ -5,8 +5,8 @@
  *
  * - 성별 / 나이 / 임신 / 지병 / 기타 자유 입력
  * - localStorage 키: medimentor_care_user_info_v1
- * - 저장 후 /chat 이동
- * - 건너뛰기 시 빈 객체 저장 + /chat 이동
+ * - 저장 후 /care/check 이동 (D2 체크리스트 메인 흐름)
+ * - 건너뛰기 시 빈 객체 저장 + /care/check 이동
  * - AGENDA-14 (영아 <1세) / AGENDA-16 (고령 여성 ACS) 정책 정확도 향상 목적
  * - PII 클라이언트 한정 (서버 전송은 chat fetch body에 일회성만)
  */
@@ -66,14 +66,14 @@ export function UserInfoForm() {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(info))
     }
-    router.push('/chat')
+    router.push('/care/check')
   }
 
   function skip() {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(EMPTY_USER_INFO))
     }
-    router.push('/chat')
+    router.push('/care/check')
   }
 
   return (
