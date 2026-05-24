@@ -5,8 +5,8 @@
  *
  * - 최초 방문 시 1회 표시
  * - localStorage 키: medimentor_care_disclaimer_acked_v1 (버전 키)
- * - 안내 4건 (체크박스 X, 단일 확인 버튼)
- * - 의학적 진단 부정 / 응급 119 / 의료기관 방문 권유 / 책임 분기
+ * - 안내 5건 (체크박스 X, 단일 확인 버튼)
+ * - 의학적 진단 부정 / 응급 119 / 의료기관 방문 권유 / 책임 분기 / 건강기능식품 비보증 (G5-5 추가)
  * - "확인하고 시작하기" 클릭 시 localStorage 저장 + 모달 닫힘
  * - 모달 표시 중 body 스크롤 차단 + ESC 키로 닫기 가능
  * - 디자인: 흰 배경 + teal 강조 + 기본 그림자 (ui-tokens v2는 2단계 G3-3에서 정착)
@@ -79,6 +79,10 @@ export function DisclaimerModal() {
           <li className="flex gap-2">
             <span className="text-teal-700 font-bold flex-shrink-0">·</span>
             <span>본 서비스 이용으로 발생하는 결과에 대한 최종 판단·책임은 사용자에게 있습니다.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-amber-700 font-bold flex-shrink-0">·</span>
+            <span>본 서비스가 안내하는 건강기능식품 정보는 효능을 의학적으로 보증하지 않으며, 복용 전 의사·약사의 상담을 권장합니다.</span>
           </li>
         </ul>
 

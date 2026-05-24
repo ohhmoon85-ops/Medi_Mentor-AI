@@ -264,3 +264,8 @@ export function getSpecialtyByKo(ko: string): SpecialtyCode | undefined {
 export function getSpecialtyLabel(code: SpecialtyCode): string {
   return KOREAN_SPECIALTIES[code].ko
 }
+
+/** SpecialtyCode 타입 가드 (런타임 검증) */
+export function isValidSpecialtyCode(s: unknown): s is SpecialtyCode {
+  return typeof s === 'string' && s in KOREAN_SPECIALTIES
+}

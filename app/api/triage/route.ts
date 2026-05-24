@@ -49,7 +49,7 @@ LLM의 역할은 정보 수집 + 다음 질문 생성 + ready_for_triage 판정�
 
 [G4-1 KTAS 원칙 — 절대 준수]
 당신은 한국형 응급환자 분류도구(KTAS, 보건복지부 고시 제2023-287호)에
-기반한 1차 의료 안내 AI입니다. medimentor Care 서비스로서 다음을 따릅니다.
+기반한 1차 의료 안내 AI입니다. 닥터홈 서비스로서 다음을 따릅니다.
 
 [응답 원칙]
 1. 추가 질문은 최대 2개까지만 허용.
@@ -86,11 +86,19 @@ LLM의 역할은 정보 수집 + 다음 질문 생성 + ready_for_triage 판정�
 - 대량 출혈
 - 자살·자해 의도 표현
 
+[G5-4 건강기능식품 메타]
+결론 응답(ready_for_triage=true)일 때 가능하면 captured_so_far 또는 별도 필드 symptomKey 에
+다음 키 중 하나를 매칭해 포함 (UI 보조 안내용. 매칭 불가 시 생략):
+knee_pain, joint_general, rhinitis, hypertension, hyperlipidemia, immune, fatigue, eye_health,
+liver, stomach, intestinal, bone, hair, skin, sleep, stress, memory, menopause, prostate, general_wellness.
+※ 건강기능식품 자체를 답변에 나열·추천하지 말 것 (UI 컴포넌트가 처리). 효능·치료 추정 금지.
+
 응답은 반드시 다음 JSON 형식으로만 한다 (next_question 은 자연스러운 한국어, 친근한 톤):
 {
   "next_question": "...",
   "captured_so_far": {...},
-  "ready_for_triage": false
+  "ready_for_triage": false,
+  "symptomKey": "..."
 }`
 
 // red_flag_warning 응답 타입
@@ -191,7 +199,7 @@ export async function POST(req: NextRequest) {
 
     const rawText = response.content[0].type === 'text' ? response.content[0].text : '{}'
 
-    let parsed: { next_question?: string; captured_so_far?: Record<string, unknown>; ready_for_triage?: boolean }
+    let parsed: { next_question?: string; captured_so_far?: Record<string, unknown>; ready_for_triage?: boolean; symptomKey?: string }
     try {
       const jsonMatch = rawText.match(/\{[\s\S]*\}/)
       parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {}
@@ -293,6 +301,7 @@ export async function POST(req: NextRequest) {
         isMinor: effectiveIsMinor,
         age: ageFromCapture ?? null,
       },
+      symptomKey: typeof parsed.symptomKey === 'string' ? parsed.symptomKey : undefined,
     })
   } catch (err) {
     console.error('[triage] error:', err)

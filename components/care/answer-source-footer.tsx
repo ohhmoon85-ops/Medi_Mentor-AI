@@ -17,6 +17,8 @@ const KTAS_JKSEM_URL = 'https://www.jksem.org/upload/pdf/jksem-28-6-547.pdf'
 export interface AnswerSourceFooterProps {
   ktasLevel?: 1 | 2 | 3 | 4 | 5
   additionalSources?: { name: string; reference: string; url?: string }[]
+  /** G5-5: true 시 건강기능식품 출처 한 줄 추가 (식약처 인증 기능성 원료 일반 정보) */
+  supplementSource?: boolean
 }
 
 function SourceLink({ href, label = '[원문 보기]' }: { href: string; label?: string }) {
@@ -32,7 +34,7 @@ function SourceLink({ href, label = '[원문 보기]' }: { href: string; label?:
   )
 }
 
-export function AnswerSourceFooter({ ktasLevel, additionalSources }: AnswerSourceFooterProps) {
+export function AnswerSourceFooter({ ktasLevel, additionalSources, supplementSource }: AnswerSourceFooterProps) {
   return (
     <div className="mt-3 border-t border-gray-200 pt-3 text-xs sm:text-[13px] leading-relaxed text-gray-600 bg-gray-50 rounded-b-2xl px-3 sm:px-4 py-3 space-y-2">
       <p className="font-semibold text-gray-700 flex items-center gap-1">
@@ -58,6 +60,11 @@ export function AnswerSourceFooter({ ktasLevel, additionalSources }: AnswerSourc
             {s.url && <> <SourceLink href={s.url} /></>}
           </li>
         ))}
+        {supplementSource && (
+          <li>
+            건강기능식품: <span className="text-gray-500">식약처 인증 기능성 원료 기반 일반 정보</span>
+          </li>
+        )}
       </ul>
       <p className="text-amber-700 font-medium pt-1 border-t border-gray-100 mt-2">
         ⚠️ 본 안내는 의학적 진단이 아닙니다. 응급 시 즉시 119, 정확한 진단은 의료기관 방문이 필요합니다.

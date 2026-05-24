@@ -3,8 +3,7 @@ import { embedText } from '@/lib/rag/embed'
 import { retrieveEvidence } from '@/lib/rag/retrieve'
 import { generateAnswer } from '@/lib/rag/generate'
 import { applyMedicalLawFilter } from '@/lib/safety/medical-law-filter'
-import { KOREAN_SPECIALTIES } from '@/lib/constants/specialties'
-import { isValidSpecialtyCode } from '@/lib/utils/pro-context'
+import { KOREAN_SPECIALTIES, isValidSpecialtyCode } from '@/lib/constants/specialties'
 
 export async function POST(req: NextRequest) {
   try {

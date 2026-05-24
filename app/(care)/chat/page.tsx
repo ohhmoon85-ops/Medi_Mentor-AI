@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { UserInfo } from '@/components/care/user-info-form'
 import { AnswerSourceFooter } from '@/components/care/answer-source-footer'
+import { SupplementInfoCard } from '@/components/care/supplement-info-card'
 import { AcuityBadge } from '@/components/ui/acuity-badge'
 import { RedFlagWarningCard } from '@/components/ui/red-flag-warning-card'
 import type { AcuityLevel } from '@/lib/triage/mts-engine'
@@ -18,8 +19,10 @@ const RED_FLAG_MIN_INPUT_LENGTH = 5
 interface Message {
   role: 'user' | 'assistant'
   content: string
-  /** G4-1: 결론 메시지 (응급도 분류 완료) 일 때만 설정. KTAS Level 1~5 (= medimentor L1~L5) */
+  /** G4-1: 결론 메시지 (응급도 분류 완료) 일 때만 설정. KTAS Level 1~5 (= 닥터홈 L1~L5) */
   ktasLevel?: 1 | 2 | 3 | 4 | 5
+  /** G5-4: LLM이 결론 turn에 매칭한 증상 키 (lib/supplements/data.ts). 카드 마운트 트리거 */
+  symptomKey?: string
 }
 
 interface CapturedDemographics {
@@ -189,9 +192,15 @@ export default function ChatPage() {
           ? acuity
           : undefined
 
+      // G5-4: 결론 turn 한정 symptomKey 첨부 → SupplementInfoCard 마운트 트리거
+      const symptomKey: string | undefined =
+        ktasLevel !== undefined && typeof data.symptomKey === 'string' && data.symptomKey.trim() !== ''
+          ? data.symptomKey
+          : undefined
+
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: data.reply, ktasLevel },
+        { role: 'assistant', content: data.reply, ktasLevel, symptomKey },
       ])
 
       if (data.triage) {
@@ -297,7 +306,10 @@ export default function ChatPage() {
                 {msg.content}
               </div>
               {msg.role === 'assistant' && msg.ktasLevel && (
-                <AnswerSourceFooter ktasLevel={msg.ktasLevel} />
+                <AnswerSourceFooter ktasLevel={msg.ktasLevel} supplementSource={Boolean(msg.symptomKey)} />
+              )}
+              {msg.role === 'assistant' && msg.ktasLevel && (
+                <SupplementInfoCard symptomKey={msg.symptomKey} conclusionText={msg.content} />
               )}
             </div>
           </div>
