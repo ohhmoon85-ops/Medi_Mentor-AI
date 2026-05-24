@@ -13,6 +13,23 @@ import { matchUrgent } from './urgent-triggers'
 import { matchCombinations } from './combinations'
 import { REGIONS } from './regions'
 
+/**
+ * UX 피드백 (2026-05-24): 부위별 기본 supplementKey 폴백.
+ * combinations 룰에 supplementKey 누락 시(51개 중 29개) + 일반 안내 폴백 시
+ * 본 매핑으로 SupplementInfoCard가 항상 마운트되도록 보장.
+ * 응급(urgent) 분기에는 적용 X (영양제 권유 부적절).
+ */
+const REGION_DEFAULT_SUPPLEMENT: Record<RegionId, string> = {
+  HEAD_FACE:  'stress',            // 두통·어지러움 — 마그네슘·L-테아닌
+  NECK_CHEST: 'immune',            // 호흡기·인후 — 비타민D·아연
+  ABDOMEN:    'stomach',           // 소화기 — 프로바이오틱스
+  LIMBS:      'joint_general',     // 관절·근육 — 글루코사민·콜라겐
+  SKIN:       'skin',              // 피부 — 콜라겐·비타민C
+  ENT_EYE:    'eye_health',        // 눈 — 루테인 (코·귀는 immune 대안)
+  URO_OBGYN:  'general_wellness',  // 비뇨·여성 — 종합비타민 (안전 폴백)
+  SYSTEMIC:   'general_wellness',  // 전신 — 종합비타민·오메가-3
+}
+
 function buildRationale(region: RegionId, checkedCount: number, context: ChecklistContext): string {
   const r = REGIONS[region].label
   const dur = {
@@ -67,16 +84,18 @@ export function runDecisionEngine(params: {
       combinationMatches: combinations,
       ktas: top.ktas,
       primarySpecialty: top.specialty,
-      supplementKey: top.supplementKey,
+      // UX 피드백: 룰에 supplementKey 없으면 부위 폴백
+      supplementKey: top.supplementKey ?? REGION_DEFAULT_SUPPLEMENT[region],
       rationale,
     }
   }
 
-  // 3단: 매치 없음 — 일반 안내
+  // 3단: 매치 없음 — 일반 안내 (부위 기반 supplementKey 폴백)
   return {
     combinationMatches: [],
     ktas: 4,
     primarySpecialty: REGIONS[region].primarySpecialty,
+    supplementKey: REGION_DEFAULT_SUPPLEMENT[region],
     rationale: `${rationale} — 조합 매칭 없음, 일반 외래 진료 권장`,
   }
 }
