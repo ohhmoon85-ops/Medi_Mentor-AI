@@ -10,6 +10,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { RotateCcw } from 'lucide-react'
 import { RegionGrid } from '@/components/care/checklist/region-grid'
 import { SymptomCheckboxes } from '@/components/care/checklist/symptom-checkboxes'
 import { ContextInput } from '@/components/care/checklist/context-input'
@@ -170,9 +171,10 @@ export default function CheckPage() {
           <button
             type="button"
             onClick={reset}
-            className="w-full border border-gray-300 text-gray-700 py-2.5 rounded-xl hover:bg-gray-50"
+            className="w-full inline-flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-2.5 rounded-xl hover:bg-gray-50"
           >
-            🔄 새로 체크하기
+            <RotateCcw className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            새로 체크하기
           </button>
         </section>
       )}
